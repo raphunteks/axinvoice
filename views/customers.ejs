@@ -2,55 +2,65 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title><%= customer.id ? 'Edit' : 'Tambah' %> Customer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers - <%= settings.businessName || 'AXA XYZ' %></title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-    <nav class="navbar"><div class="container nav-content"><div class="brand"><%= settings.businessName %></div><div class="nav-links"><a href="/dashboard">Dashboard</a><a href="/customers">Customers</a><a href="/invoices">Invoices</a><a href="/settings">Settings</a></div></div></nav>
+<body class="min-h-screen">
+    <nav class="navbar">
+        <div class="container nav-content">
+            <div class="brand"><%= settings.businessName || 'AXA XYZ' %></div>
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/customers">Customers</a>
+                <a href="/invoices">Invoices</a>
+                <a href="/settings">Settings</a>
+                <form action="/logout" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-outline">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
 
-    <div class="container mt-8 max-w-2xl">
-        <h2><%= customer.id ? 'Edit' : 'Tambah' %> Customer</h2>
-        <form action="<%= customer.id ? '/customers/'+customer.id+'/edit' : '/customers' %>" method="POST" class="card p-6 mt-4 grid gap-4">
-            <div class="form-group">
-                <label>Company Name *</label>
-                <input type="text" name="companyName" class="form-control" value="<%= customer.companyName || '' %>" required>
-            </div>
-            <div class="form-group">
-                <label>Contact Person</label>
-                <input type="text" name="contactPerson" class="form-control" value="<%= customer.contactPerson || '' %>">
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email" class="form-control" value="<%= customer.email || '' %>">
-                </div>
-                <div class="form-group">
-                    <label>Phone</label>
-                    <input type="text" name="phone" class="form-control" value="<%= customer.phone || '' %>">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Address</label>
-                <textarea name="address" class="form-control"><%= customer.address || '' %></textarea>
-            </div>
-            <div class="grid grid-cols-3 gap-4">
-                <div class="form-group"><label>City</label><input type="text" name="city" class="form-control" value="<%= customer.city || '' %>"></div>
-                <div class="form-group"><label>Province</label><input type="text" name="province" class="form-control" value="<%= customer.province || '' %>"></div>
-                <div class="form-group"><label>Postal Code</label><input type="text" name="postalCode" class="form-control" value="<%= customer.postalCode || '' %>"></div>
-            </div>
-            <div class="form-group">
-                <label>NPWP</label>
-                <input type="text" name="npwp" class="form-control" value="<%= customer.npwp || '' %>">
-            </div>
-            <div class="form-group">
-                <label>Notes</label>
-                <textarea name="notes" class="form-control"><%= customer.notes || '' %></textarea>
-            </div>
-            <div class="flex justify-end mt-4">
-                <a href="/customers" class="btn mr-2">Batal</a>
-                <button type="submit" class="btn btn-primary">Simpan Customer</button>
-            </div>
-        </form>
+    <div class="container mt-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2>Customers</h2>
+            <a href="/customers/new" class="btn btn-primary">+ Tambah Customer</a>
+        </div>
+
+        <% if(typeof success !== 'undefined' && success) { %>
+            <div class="alert alert-success mb-4"><%= success %></div>
+        <% } %>
+
+        <div class="card overflow-x-auto mb-8">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Company Name</th>
+                        <th>Contact Person</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% customers.forEach(c => { %>
+                    <tr>
+                        <td class="font-medium"><%= c.companyName %></td>
+                        <td><%= c.contactPerson %></td>
+                        <td><%= c.email %></td>
+                        <td><%= c.phone %></td>
+                        <td>
+                            <a href="/customers/<%= c.id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+                        </td>
+                    </tr>
+                    <% }) %>
+                    <% if(customers.length === 0) { %>
+                        <tr><td colspan="5" class="text-center py-6 text-gray-500">Belum ada customer.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 </html>
