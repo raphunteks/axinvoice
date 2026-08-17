@@ -11,10 +11,15 @@ const app = express();
 // ==========================================
 // 1. CONFIGURATION & SERVICES
 // ==========================================
+// Fail-safe Redis initialization: Mengambil dari Vercel KV Env Variables
 const redis = new Redis({
   url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
   token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN,
 });
+
+// TRUST PROXY WAJIB UNTUK VERCEL!
+// Jika ini tidak ada, session cookie secure:true akan ditolak oleh Vercel.
+app.set('trust proxy', 1); 
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -22,7 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Security Headers (Helmet) - Adjusted for EJS inline scripts
+// Security Headers (Helmet)
 app.use(helmet({
   contentSecurityPolicy: false, 
 }));
@@ -39,7 +44,8 @@ app.use(session({
   cookie: { 
     httpOnly: true, 
     secure: process.env.NODE_ENV === 'production', 
-    sameSite: 'lax' 
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000 // Sesi aktif selama 24 jam
   }
 }));
 
@@ -60,7 +66,6 @@ app.use(async (req, res, next) => {
     res.locals.settings = settings;
   } catch (dbError) {
     console.error('🔴 REDIS CONNECTION ERROR IN MIDDLEWARE:', dbError.message);
-    // Fallback if database is unreachable so the app doesn't crash 500 completely
     res.locals.settings = { businessName: 'AXA XYZ (DB Offline)', invoicePrefix: 'AXZ' };
   }
   
@@ -81,7 +86,6 @@ const formatRupiah = (amount) => {
 app.locals.formatRupiah = formatRupiah;
 app.locals.formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('id-ID') : '';
 
-// Invoice Status Rule Helper
 const checkOverdue = (invoice) => {
   if (invoice.status === 'PAID') return invoice;
   if (invoice.balance > 0 && new Date(invoice.dueDate) < new Date() && invoice.status !== 'DRAFT') {
@@ -99,6 +103,7 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
+  // SUDAH DIUPGRADE: Menggunakan username, bukan email
   const { username, password } = req.body;
   
   // Strict checking menggunakan ADMIN_USER dan ADMIN_PASS
@@ -190,7 +195,6 @@ app.get('/invoices', requireAuth, async (req, res) => {
   const ids = await redis.lrange('axa:invoices', 0, -1);
   let invoices = ids.length ? await Promise.all(ids.map(id => redis.get(`axa:invoice:${id}`))) : [];
   
-  // Fetch customer names
   for(let inv of invoices) {
     if(inv) {
         inv = checkOverdue(inv);
@@ -218,7 +222,6 @@ app.post('/invoices', requireAuth, async (req, res) => {
   
   const { customerId, invoiceDate, dueDate, items, notes } = req.body;
   
-  // Server-side Calculation
   let subtotal = 0;
   let tax = 0;
   const processedItems = [];
@@ -311,7 +314,6 @@ app.get('/invoices/:id/print', requireAuth, async (req, res) => {
 // 7. PUBLIC INVOICE
 // ==========================================
 app.get('/invoice/:publicId', async (req, res) => {
-  // Find invoice by publicId (Sequential scan for MVP, upgrade to index later if needed)
   const ids = await redis.lrange('axa:invoices', 0, -1);
   let invoices = ids.length ? await Promise.all(ids.map(id => redis.get(`axa:invoice:${id}`))) : [];
   let invoice = invoices.find(i => i && i.publicId === req.params.publicId);
@@ -321,7 +323,6 @@ app.get('/invoice/:publicId', async (req, res) => {
   invoice = checkOverdue(invoice);
   const customer = await redis.get(`axa:customer:${invoice.customerId}`);
   
-  // Minimalist public view
   res.render('invoice-public', { invoice, customer });
 });
 
