@@ -2,13 +2,24 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buat Invoice</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-    <nav class="navbar"><div class="container nav-content"><div class="brand"><%= settings.businessName %></div><div class="nav-links"><a href="/dashboard">Dashboard</a><a href="/customers">Customers</a><a href="/invoices">Invoices</a><a href="/settings">Settings</a></div></div></nav>
+<body class="min-h-screen">
+    <nav class="navbar">
+        <div class="container nav-content">
+            <div class="brand"><%= settings.businessName || 'AXA XYZ' %></div>
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/customers">Customers</a>
+                <a href="/invoices">Invoices</a>
+                <a href="/settings">Settings</a>
+            </div>
+        </div>
+    </nav>
 
-    <div class="container mt-8">
+    <div class="container mt-8 mb-8">
         <h2>Buat Invoice Baru</h2>
         <form action="/invoices" method="POST" class="mt-4" id="invoiceForm">
             <div class="card p-6 mb-6 grid grid-cols-3 gap-6">
@@ -52,7 +63,7 @@
                         </tbody>
                     </table>
                 </div>
-                <button type="button" class="btn mt-4" onclick="addItem()">+ Add Item</button>
+                <button type="button" class="btn btn-outline mt-4" onclick="addItem()">+ Add Item</button>
             </div>
 
             <div class="grid grid-cols-2 gap-6">
@@ -63,15 +74,15 @@
                     </div>
                 </div>
                 <div class="card p-6 bg-gray-50">
-                    <div class="flex justify-between mb-2"><span>Subtotal</span><span id="ui-subtotal">Rp 0</span></div>
-                    <div class="flex justify-between mb-2"><span>Tax</span><span id="ui-tax">Rp 0</span></div>
-                    <hr class="my-2">
-                    <div class="flex justify-between font-bold text-xl"><span>Grand Total</span><span id="ui-total">Rp 0</span></div>
+                    <div class="flex justify-between mb-2 text-gray-600"><span>Subtotal</span><span id="ui-subtotal">Rp 0</span></div>
+                    <div class="flex justify-between mb-2 text-gray-600"><span>Tax</span><span id="ui-tax">Rp 0</span></div>
+                    <hr class="my-4 border-gray-300">
+                    <div class="flex justify-between font-bold text-xl"><span>Grand Total</span><span id="ui-total" class="text-primary">Rp 0</span></div>
                 </div>
             </div>
 
-            <div class="mt-6 flex justify-end">
-                <a href="/invoices" class="btn mr-2">Batal</a>
+            <div class="mt-6 flex justify-end gap-4">
+                <a href="/invoices" class="btn btn-outline">Batal</a>
                 <button type="submit" class="btn btn-primary">Simpan Draft</button>
             </div>
         </form>
