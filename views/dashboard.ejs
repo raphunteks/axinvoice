@@ -22,13 +22,13 @@
         </div>
     </nav>
 
-    <div class="container mt-8">
+    <!-- Ditambahkan mb-12 agar ruang bawah lega dan tidak tertimpah layar -->
+    <div class="container mt-8 mb-12">
         <div class="flex justify-between items-center mb-6">
             <h2>Dashboard</h2>
             <a href="/invoices/new" class="btn btn-primary btn-sm">+ Buat Invoice</a>
         </div>
         
-        <!-- Notifikasi Fail-Safe Database -->
         <% if(typeof error !== 'undefined' && error) { %>
             <div class="alert alert-danger mb-4"><%= error %></div>
         <% } %>
