@@ -2,11 +2,25 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Invoices - <%= settings.businessName %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoices - <%= settings.businessName || 'AXA XYZ' %></title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-    <nav class="navbar"><div class="container nav-content"><div class="brand"><%= settings.businessName %></div><div class="nav-links"><a href="/dashboard">Dashboard</a><a href="/customers">Customers</a><a href="/invoices">Invoices</a><a href="/settings">Settings</a></div></div></nav>
+<body class="min-h-screen">
+    <nav class="navbar">
+        <div class="container nav-content">
+            <div class="brand"><%= settings.businessName || 'AXA XYZ' %></div>
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/customers">Customers</a>
+                <a href="/invoices">Invoices</a>
+                <a href="/settings">Settings</a>
+                <form action="/logout" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-outline">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
 
     <div class="container mt-8">
         <div class="flex justify-between items-center mb-6">
@@ -14,9 +28,11 @@
             <a href="/invoices/new" class="btn btn-primary">+ Buat Invoice</a>
         </div>
 
-        <% if(success) { %><div class="alert alert-success mb-4"><%= success %></div><% } %>
+        <% if(typeof success !== 'undefined' && success) { %>
+            <div class="alert alert-success mb-4"><%= success %></div>
+        <% } %>
 
-        <div class="card overflow-x-auto">
+        <div class="card overflow-x-auto mb-8">
             <table class="table">
                 <thead>
                     <tr>
@@ -33,15 +49,15 @@
                 <tbody>
                     <% invoices.forEach(inv => { %>
                     <tr>
-                        <td><%= inv.number %></td>
+                        <td class="font-medium"><%= inv.number %></td>
                         <td><%= inv.customerName %></td>
                         <td><%= formatDate(inv.invoiceDate) %></td>
                         <td><%= formatDate(inv.dueDate) %></td>
-                        <td><%= formatRupiah(inv.total) %></td>
-                        <td><%= formatRupiah(inv.balance) %></td>
+                        <td class="font-bold"><%= formatRupiah(inv.total) %></td>
+                        <td class="text-orange-500 font-medium"><%= formatRupiah(inv.balance) %></td>
                         <td><span class="badge badge-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
                         <td>
-                            <a href="/invoices/<%= inv.id %>" class="btn btn-sm">View</a>
+                            <a href="/invoices/<%= inv.id %>" class="btn btn-sm btn-outline">View</a>
                         </td>
                     </tr>
                     <% }) %>
