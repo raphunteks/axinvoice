@@ -2,20 +2,36 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Settings - <%= settings.businessName %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - <%= settings.businessName || 'AXA XYZ' %></title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-    <nav class="navbar"><div class="container nav-content"><div class="brand"><%= settings.businessName %></div><div class="nav-links"><a href="/dashboard">Dashboard</a><a href="/customers">Customers</a><a href="/invoices">Invoices</a><a href="/settings">Settings</a></div></div></nav>
+<body class="min-h-screen">
+    <nav class="navbar">
+        <div class="container nav-content">
+            <div class="brand"><%= settings.businessName || 'AXA XYZ' %></div>
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/customers">Customers</a>
+                <a href="/invoices">Invoices</a>
+                <a href="/settings">Settings</a>
+                <form action="/logout" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-outline">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
 
-    <div class="container mt-8 max-w-3xl">
+    <div class="container mt-8 max-w-3xl mb-8">
         <h2>System Settings</h2>
         
-        <% if(success) { %><div class="alert alert-success mb-4 mt-4"><%= success %></div><% } %>
+        <% if(typeof success !== 'undefined' && success) { %>
+            <div class="alert alert-success mb-4 mt-4"><%= success %></div>
+        <% } %>
 
         <form action="/settings" method="POST" class="mt-4 grid gap-6">
             <div class="card p-6">
-                <h3 class="mb-4 font-bold border-b pb-2">Business Identity</h3>
+                <h3 class="mb-4 font-bold border-b pb-2 text-primary">Business Identity</h3>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="form-group"><label>Business Name</label><input type="text" name="businessName" class="form-control" value="<%= settings.businessName || '' %>" required></div>
                     <div class="form-group"><label>NPWP</label><input type="text" name="npwp" class="form-control" value="<%= settings.npwp || '' %>"></div>
@@ -26,7 +42,7 @@
             </div>
 
             <div class="card p-6">
-                <h3 class="mb-4 font-bold border-b pb-2">Payment Information</h3>
+                <h3 class="mb-4 font-bold border-b pb-2 text-primary">Payment Information</h3>
                 <div class="grid grid-cols-3 gap-4">
                     <div class="form-group"><label>Bank Name</label><input type="text" name="bankName" class="form-control" value="<%= settings.bankName || '' %>"></div>
                     <div class="form-group"><label>Account Number</label><input type="text" name="bankAccount" class="form-control" value="<%= settings.bankAccount || '' %>"></div>
@@ -35,7 +51,7 @@
             </div>
 
             <div class="card p-6">
-                <h3 class="mb-4 font-bold border-b pb-2">Invoice Defaults</h3>
+                <h3 class="mb-4 font-bold border-b pb-2 text-primary">Invoice Defaults</h3>
                 <div class="grid grid-cols-3 gap-4 mb-4">
                     <div class="form-group"><label>Invoice Prefix</label><input type="text" name="invoicePrefix" class="form-control" value="<%= settings.invoicePrefix || 'AXZ' %>"></div>
                     <div class="form-group"><label>Default Tax Name</label><input type="text" name="defaultTaxName" class="form-control" value="<%= settings.defaultTaxName || 'PPN' %>"></div>
@@ -45,7 +61,7 @@
                 <div class="form-group"><label>Terms & Conditions</label><textarea name="terms" class="form-control" rows="3"><%= settings.terms || '' %></textarea></div>
             </div>
 
-            <button type="submit" class="btn btn-primary ml-auto block">Save Settings</button>
+            <button type="submit" class="btn btn-primary ml-auto block px-8">Save Settings</button>
         </form>
     </div>
 </body>
