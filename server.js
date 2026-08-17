@@ -27,6 +27,10 @@ app.use(helmet({
   contentSecurityPolicy: false, 
 }));
 
+// Ignore Favicon 404 Logs to keep Vercel logs clean
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+app.get('/favicon.png', (req, res) => res.status(204).end());
+
 // Session Management
 app.use(session({
   secret: process.env.SESSION_SECRET || 'fallback-secret-development-only',
