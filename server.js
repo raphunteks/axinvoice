@@ -35,8 +35,53 @@ app.use(helmet({
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.get('/favicon.png', (req, res) => res.status(204).end());
 
-// Session Management
+
+// ==========================================
+// 2. UPSTASH REDIS SESSION STORE (CUSTOM ENGINE)
+// ==========================================
+// Mencegah auto-logout di Vercel dengan menyimpan Sesi ke Redis Database
+const Store = session.Store;
+class UpstashSessionStore extends Store {
+  constructor(options = {}) {
+    super(options);
+    this.client = options.client;
+    this.prefix = options.prefix || 'axa:session:';
+    this.ttl = options.ttl || 86400; // 24 hours (Sesi bertahan 1 hari)
+  }
+
+  async get(sid, callback) {
+    try {
+      let data = await this.client.get(this.prefix + sid);
+      if (!data) return callback(null, null);
+      if (typeof data === 'string') data = JSON.parse(data);
+      return callback(null, data);
+    } catch (err) {
+      return callback(err);
+    }
+  }
+
+  async set(sid, sessionData, callback) {
+    try {
+      await this.client.set(this.prefix + sid, JSON.stringify(sessionData), { ex: this.ttl });
+      return callback(null);
+    } catch (err) {
+      return callback(err);
+    }
+  }
+
+  async destroy(sid, callback) {
+    try {
+      await this.client.del(this.prefix + sid);
+      return callback(null);
+    } catch (err) {
+      return callback(err);
+    }
+  }
+}
+
+// Session Management (Kini menggunakan UpstashSessionStore!)
 app.use(session({
+  store: new UpstashSessionStore({ client: redis }),
   secret: process.env.SESSION_SECRET || 'fallback-secret-development-only',
   resave: false,
   saveUninitialized: false,
@@ -72,7 +117,7 @@ app.use(async (req, res, next) => {
 });
 
 // ==========================================
-// 2. MIDDLEWARES & HELPERS
+// 3. MIDDLEWARES & HELPERS
 // ==========================================
 const requireAuth = (req, res, next) => {
   if (!req.session.user) return res.redirect('/login');
@@ -94,7 +139,7 @@ const checkOverdue = (invoice) => {
 };
 
 // ==========================================
-// 3. AUTH ROUTES
+// 4. AUTH ROUTES
 // ==========================================
 app.get('/login', (req, res) => {
   if (req.session.user) return res.redirect('/dashboard');
@@ -123,7 +168,7 @@ app.get('/', (req, res) => {
 });
 
 // ==========================================
-// 4. DASHBOARD
+// 5. DASHBOARD
 // ==========================================
 app.get('/dashboard', requireAuth, async (req, res) => {
   try {
@@ -150,7 +195,6 @@ app.get('/dashboard', requireAuth, async (req, res) => {
     res.render('dashboard', { stats, recentInvoices });
   } catch (error) {
     console.error('🔥 DASHBOARD ERROR:', error.message);
-    // FAIL-SAFE: Render UI normally but with empty data and an error message
     res.render('dashboard', { 
       stats: { totalInvoices: 0, totalBilled: 0, totalPaid: 0, outstanding: 0, overdue: 0 }, 
       recentInvoices: [],
@@ -160,7 +204,7 @@ app.get('/dashboard', requireAuth, async (req, res) => {
 });
 
 // ==========================================
-// 5. CUSTOMERS
+// 6. CUSTOMERS
 // ==========================================
 app.get('/customers', requireAuth, async (req, res) => {
   try {
@@ -214,7 +258,7 @@ app.post('/customers/:id/edit', requireAuth, async (req, res) => {
 });
 
 // ==========================================
-// 6. INVOICES
+// 7. INVOICES
 // ==========================================
 app.get('/invoices', requireAuth, async (req, res) => {
   try {
@@ -363,7 +407,7 @@ app.get('/invoices/:id/print', requireAuth, async (req, res) => {
 });
 
 // ==========================================
-// 7. PUBLIC INVOICE
+// 8. PUBLIC INVOICE
 // ==========================================
 app.get('/invoice/:publicId', async (req, res) => {
   try {
@@ -383,7 +427,7 @@ app.get('/invoice/:publicId', async (req, res) => {
 });
 
 // ==========================================
-// 8. SETTINGS
+// 9. SETTINGS
 // ==========================================
 app.get('/settings', requireAuth, (req, res) => {
   res.render('settings');
@@ -401,7 +445,7 @@ app.post('/settings', requireAuth, async (req, res) => {
 });
 
 // ==========================================
-// 9. ERROR HANDLING
+// 10. ERROR HANDLING
 // ==========================================
 app.use((err, req, res, next) => {
   console.error('🔥 FATAL SERVER ERROR:', err.stack);
