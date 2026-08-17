@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice <%= invoice.number %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/invoice.css">
+</head>
+<body onload="window.print()">
+    <!-- Reusing same layout as public but completely stripped of UI containers -->
+    <div class="invoice-box" style="box-shadow: none; max-width: 100%; margin: 0; padding: 0;">
+        <div class="flex justify-between items-start mb-8 border-b pb-6">
+            <div>
+                <h1 class="text-4xl font-bold text-primary mb-2">INVOICE</h1>
+                <p class="text-gray-500 text-lg">#<%= invoice.number %></p>
+            </div>
+            <div class="text-right">
+                <h2 class="font-bold text-xl"><%= settings.businessName || 'AXA XYZ' %></h2>
+                <p class="text-sm text-gray-500"><%= settings.businessAddress || '' %></p>
+                <p class="text-sm text-gray-500"><%= settings.businessEmail || '' %></p>
+                <p class="text-sm text-gray-500"><%= settings.businessPhone || '' %></p>
+                <% if(settings.npwp) { %><p class="text-sm text-gray-500">NPWP: <%= settings.npwp %></p><% } %>
+            </div>
+        </div>
+
+        <div class="flex justify-between mb-8">
+            <div>
+                <h3 class="font-bold text-gray-600 border-b mb-2 pb-1">BILL TO:</h3>
+                <p class="font-bold"><%= customer.companyName %></p>
+                <p class="text-sm"><%= customer.address || '' %></p>
+                <p class="text-sm"><%= customer.city || '' %> <%= customer.postalCode || '' %></p>
+                <p class="text-sm"><%= customer.email || '' %></p>
+                <% if(customer.npwp) { %><p class="text-sm">NPWP: <%= customer.npwp %></p><% } %>
+            </div>
+            <div class="text-right">
+                <table class="text-sm ml-auto">
+                    <tr><td class="font-bold pr-4">Status:</td><td><span class="badge badge-<%= invoice.status.toLowerCase() %>"><%= invoice.status %></span></td></tr>
+                    <tr><td class="font-bold pr-4">Invoice Date:</td><td><%= formatDate(invoice.invoiceDate) %></td></tr>
+                    <tr><td class="font-bold pr-4">Due Date:</td><td><%= formatDate(invoice.dueDate) %></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <table class="invoice-table mb-8">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-right">Price</th>
+                    <th class="text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% invoice.items.forEach(item => { %>
+                <tr>
+                    <td><b><%= item.description %></b><div class="text-xs text-gray-500"><%= item.period %></div></td>
+                    <td class="text-center"><%= item.quantity %></td>
+                    <td class="text-right"><%= formatRupiah(item.price) %></td>
+                    <td class="text-right"><%= formatRupiah(item.total) %></td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+
+        <div class="flex justify-between mb-8 gap-8">
+            <div class="w-1/2 p-4 bg-gray-50 rounded border">
+                <h4 class="font-bold mb-2">Payment Details</h4>
+                <p class="text-sm font-bold">Bank Transfer:</p>
+                <p class="text-sm"><%= settings.bankName %> - <%= settings.bankAccount %></p>
+                <p class="text-sm">A/N: <%= settings.bankAccountName %></p>
+            </div>
+
+            <div class="w-1/2">
+                <table class="w-full text-right text-sm">
+                    <tr><td class="py-1 text-gray-600">Subtotal</td><td class="py-1 font-medium"><%= formatRupiah(invoice.subtotal) %></td></tr>
+                    <tr><td class="py-1 text-gray-600">Tax</td><td class="py-1 font-medium"><%= formatRupiah(invoice.tax) %></td></tr>
+                    <tr class="text-lg font-bold border-t"><td class="py-2">Grand Total</td><td class="py-2"><%= formatRupiah(invoice.total) %></td></tr>
+                    <tr><td class="py-1 text-gray-600">Amount Paid</td><td class="py-1 text-green-600"><%= formatRupiah(invoice.amountPaid) %></td></tr>
+                    <tr class="font-bold text-xl"><td class="py-2">Balance Due</td><td class="py-2 text-red-600"><%= formatRupiah(invoice.balance) %></td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

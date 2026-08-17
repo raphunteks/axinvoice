@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - <%= settings.businessName || 'AXA XYZ' %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen">
+    <div class="card w-full max-w-md p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-primary"><%= settings.businessName || 'AXA XYZ' %></h1>
+            <p class="text-gray-500">Invoice Management System</p>
+        </div>
+
+        <% if(error) { %>
+            <div class="alert alert-danger mb-4"><%= error %></div>
+        <% } %>
+
+        <form action="/login" method="POST">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" class="form-control" required autofocus>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-full mt-4">LOGIN</button>
+        </form>
+    </div>
+</body>
+</html>

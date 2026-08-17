@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Buat Invoice</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar"><div class="container nav-content"><div class="brand"><%= settings.businessName %></div><div class="nav-links"><a href="/dashboard">Dashboard</a><a href="/customers">Customers</a><a href="/invoices">Invoices</a><a href="/settings">Settings</a></div></div></nav>
+
+    <div class="container mt-8">
+        <h2>Buat Invoice Baru</h2>
+        <form action="/invoices" method="POST" class="mt-4" id="invoiceForm">
+            <div class="card p-6 mb-6 grid grid-cols-3 gap-6">
+                <div class="form-group">
+                    <label>Customer *</label>
+                    <select name="customerId" class="form-control" required>
+                        <option value="">Pilih Customer...</option>
+                        <% customers.forEach(c => { %>
+                            <option value="<%= c.id %>"><%= c.companyName %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Invoice Date *</label>
+                    <input type="date" name="invoiceDate" class="form-control" required value="<%= new Date().toISOString().split('T')[0] %>">
+                </div>
+                <div class="form-group">
+                    <label>Due Date *</label>
+                    <input type="date" name="dueDate" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="card p-6 mb-6">
+                <h3 class="mb-4">Items</h3>
+                <div class="overflow-x-auto">
+                    <table class="table w-full text-sm" id="itemsTable">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Period</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Disc (%)</th>
+                                <th>Tax (%)</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsBody">
+                            <!-- Items inserted by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn mt-4" onclick="addItem()">+ Add Item</button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <div class="form-group card p-4">
+                        <label>Notes</label>
+                        <textarea name="notes" class="form-control" rows="4"><%= settings.notes || '' %></textarea>
+                    </div>
+                </div>
+                <div class="card p-6 bg-gray-50">
+                    <div class="flex justify-between mb-2"><span>Subtotal</span><span id="ui-subtotal">Rp 0</span></div>
+                    <div class="flex justify-between mb-2"><span>Tax</span><span id="ui-tax">Rp 0</span></div>
+                    <hr class="my-2">
+                    <div class="flex justify-between font-bold text-xl"><span>Grand Total</span><span id="ui-total">Rp 0</span></div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <a href="/invoices" class="btn mr-2">Batal</a>
+                <button type="submit" class="btn btn-primary">Simpan Draft</button>
+            </div>
+        </form>
+    </div>
+    
+    <script src="/js/invoice.js"></script>
+    <script>
+        // Initialize one item row
+        window.onload = () => addItem();
+    </script>
+</body>
+</html>

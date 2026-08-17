@@ -1,0 +1,18 @@
+{
+  "name": "axa-xyz-invoice",
+  "version": "1.0.0",
+  "description": "Simple Invoice Management System for Axa Xyz",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@upstash/redis": "latest",
+    "dotenv": "latest",
+    "ejs": "latest",
+    "express": "latest",
+    "express-session": "latest",
+    "helmet": "latest"
+  }
+}

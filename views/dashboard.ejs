@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - <%= settings.businessName %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/nav') || `
+    <nav class="navbar">
+        <div class="container nav-content">
+            <div class="brand">${settings.businessName}</div>
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/customers">Customers</a>
+                <a href="/invoices">Invoices</a>
+                <a href="/settings">Settings</a>
+                <form action="/logout" method="POST" style="display:inline;"><button type="submit" class="btn btn-sm">Logout</button></form>
+            </div>
+        </div>
+    </nav>` %>
+
+    <div class="container mt-8">
+        <h2>Dashboard</h2>
+        
+        <div class="grid grid-cols-4 gap-4 mt-6">
+            <div class="card p-6">
+                <div class="text-gray-500 text-sm">TOTAL INVOICE</div>
+                <div class="text-2xl font-bold"><%= stats.totalInvoices %></div>
+            </div>
+            <div class="card p-6">
+                <div class="text-gray-500 text-sm">TOTAL BILLED</div>
+                <div class="text-2xl font-bold"><%= formatRupiah(stats.totalBilled) %></div>
+            </div>
+            <div class="card p-6">
+                <div class="text-gray-500 text-sm">OUTSTANDING</div>
+                <div class="text-2xl font-bold text-orange-500"><%= formatRupiah(stats.outstanding) %></div>
+            </div>
+            <div class="card p-6">
+                <div class="text-gray-500 text-sm">OVERDUE</div>
+                <div class="text-2xl font-bold text-red-500"><%= formatRupiah(stats.overdue) %></div>
+            </div>
+        </div>
+
+        <h3 class="mt-8 mb-4">Recent Invoices</h3>
+        <div class="card">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Number</th>
+                        <th>Date</th>
+                        <th>Due Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% recentInvoices.forEach(inv => { %>
+                    <tr>
+                        <td><%= inv.number %></td>
+                        <td><%= formatDate(inv.invoiceDate) %></td>
+                        <td><%= formatDate(inv.dueDate) %></td>
+                        <td><%= formatRupiah(inv.total) %></td>
+                        <td><span class="badge badge-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
+                        <td><a href="/invoices/<%= inv.id %>" class="text-blue-500">View</a></td>
+                    </tr>
+                    <% }) %>
+                    <% if(recentInvoices.length === 0) { %>
+                        <tr><td colspan="6" class="text-center text-gray-500 py-4">Belum ada invoice.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

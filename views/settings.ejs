@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings - <%= settings.businessName %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar"><div class="container nav-content"><div class="brand"><%= settings.businessName %></div><div class="nav-links"><a href="/dashboard">Dashboard</a><a href="/customers">Customers</a><a href="/invoices">Invoices</a><a href="/settings">Settings</a></div></div></nav>
+
+    <div class="container mt-8 max-w-3xl">
+        <h2>System Settings</h2>
+        
+        <% if(success) { %><div class="alert alert-success mb-4 mt-4"><%= success %></div><% } %>
+
+        <form action="/settings" method="POST" class="mt-4 grid gap-6">
+            <div class="card p-6">
+                <h3 class="mb-4 font-bold border-b pb-2">Business Identity</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group"><label>Business Name</label><input type="text" name="businessName" class="form-control" value="<%= settings.businessName || '' %>" required></div>
+                    <div class="form-group"><label>NPWP</label><input type="text" name="npwp" class="form-control" value="<%= settings.npwp || '' %>"></div>
+                    <div class="form-group"><label>Email</label><input type="email" name="businessEmail" class="form-control" value="<%= settings.businessEmail || '' %>"></div>
+                    <div class="form-group"><label>Phone</label><input type="text" name="businessPhone" class="form-control" value="<%= settings.businessPhone || '' %>"></div>
+                    <div class="form-group col-span-2"><label>Address</label><textarea name="businessAddress" class="form-control"><%= settings.businessAddress || '' %></textarea></div>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <h3 class="mb-4 font-bold border-b pb-2">Payment Information</h3>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="form-group"><label>Bank Name</label><input type="text" name="bankName" class="form-control" value="<%= settings.bankName || '' %>"></div>
+                    <div class="form-group"><label>Account Number</label><input type="text" name="bankAccount" class="form-control" value="<%= settings.bankAccount || '' %>"></div>
+                    <div class="form-group"><label>Account Name</label><input type="text" name="bankAccountName" class="form-control" value="<%= settings.bankAccountName || '' %>"></div>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <h3 class="mb-4 font-bold border-b pb-2">Invoice Defaults</h3>
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                    <div class="form-group"><label>Invoice Prefix</label><input type="text" name="invoicePrefix" class="form-control" value="<%= settings.invoicePrefix || 'AXZ' %>"></div>
+                    <div class="form-group"><label>Default Tax Name</label><input type="text" name="defaultTaxName" class="form-control" value="<%= settings.defaultTaxName || 'PPN' %>"></div>
+                    <div class="form-group"><label>Default Tax Rate (%)</label><input type="number" name="defaultTaxRate" class="form-control" value="<%= settings.defaultTaxRate || 0 %>"></div>
+                </div>
+                <div class="form-group mb-4"><label>Default Notes</label><textarea name="notes" class="form-control" rows="3"><%= settings.notes || '' %></textarea></div>
+                <div class="form-group"><label>Terms & Conditions</label><textarea name="terms" class="form-control" rows="3"><%= settings.terms || '' %></textarea></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary ml-auto block">Save Settings</button>
+        </form>
+    </div>
+</body>
+</html>

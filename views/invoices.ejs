@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoices - <%= settings.businessName %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar"><div class="container nav-content"><div class="brand"><%= settings.businessName %></div><div class="nav-links"><a href="/dashboard">Dashboard</a><a href="/customers">Customers</a><a href="/invoices">Invoices</a><a href="/settings">Settings</a></div></div></nav>
+
+    <div class="container mt-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2>Invoices</h2>
+            <a href="/invoices/new" class="btn btn-primary">+ Buat Invoice</a>
+        </div>
+
+        <% if(success) { %><div class="alert alert-success mb-4"><%= success %></div><% } %>
+
+        <div class="card overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Number</th>
+                        <th>Customer</th>
+                        <th>Invoice Date</th>
+                        <th>Due Date</th>
+                        <th>Total</th>
+                        <th>Balance</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% invoices.forEach(inv => { %>
+                    <tr>
+                        <td><%= inv.number %></td>
+                        <td><%= inv.customerName %></td>
+                        <td><%= formatDate(inv.invoiceDate) %></td>
+                        <td><%= formatDate(inv.dueDate) %></td>
+                        <td><%= formatRupiah(inv.total) %></td>
+                        <td><%= formatRupiah(inv.balance) %></td>
+                        <td><span class="badge badge-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
+                        <td>
+                            <a href="/invoices/<%= inv.id %>" class="btn btn-sm">View</a>
+                        </td>
+                    </tr>
+                    <% }) %>
+                    <% if(invoices.length === 0) { %>
+                        <tr><td colspan="8" class="text-center py-6 text-gray-500">Belum ada invoice.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
