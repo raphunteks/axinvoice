@@ -2,10 +2,11 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - <%= settings.businessName %></title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
+<body class="min-h-screen">
     <%- include('partials/nav') || `
     <nav class="navbar">
         <div class="container nav-content">
@@ -15,35 +16,50 @@
                 <a href="/customers">Customers</a>
                 <a href="/invoices">Invoices</a>
                 <a href="/settings">Settings</a>
-                <form action="/logout" method="POST" style="display:inline;"><button type="submit" class="btn btn-sm">Logout</button></form>
+                <form action="/logout" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-outline">Logout</button>
+                </form>
             </div>
         </div>
     </nav>` %>
 
     <div class="container mt-8">
-        <h2>Dashboard</h2>
+        <div class="flex justify-between items-center mb-6">
+            <h2>Dashboard</h2>
+            <a href="/invoices/new" class="btn btn-primary btn-sm">+ Buat Invoice</a>
+        </div>
         
-        <div class="grid grid-cols-4 gap-4 mt-6">
+        <!-- Notifikasi Fail-Safe Database -->
+        <% if(typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger mb-4"><%= error %></div>
+        <% } %>
+        <% if(typeof success !== 'undefined' && success) { %>
+            <div class="alert alert-success mb-4"><%= success %></div>
+        <% } %>
+
+        <div class="grid grid-cols-4 gap-6 mt-6">
             <div class="card p-6">
-                <div class="text-gray-500 text-sm">TOTAL INVOICE</div>
-                <div class="text-2xl font-bold"><%= stats.totalInvoices %></div>
+                <div class="text-gray-500 text-sm font-bold mb-1">TOTAL INVOICE</div>
+                <div class="text-3xl font-bold"><%= stats.totalInvoices %></div>
             </div>
             <div class="card p-6">
-                <div class="text-gray-500 text-sm">TOTAL BILLED</div>
-                <div class="text-2xl font-bold"><%= formatRupiah(stats.totalBilled) %></div>
+                <div class="text-gray-500 text-sm font-bold mb-1">TOTAL BILLED</div>
+                <div class="text-2xl font-bold text-primary"><%= formatRupiah(stats.totalBilled) %></div>
             </div>
             <div class="card p-6">
-                <div class="text-gray-500 text-sm">OUTSTANDING</div>
+                <div class="text-gray-500 text-sm font-bold mb-1">OUTSTANDING</div>
                 <div class="text-2xl font-bold text-orange-500"><%= formatRupiah(stats.outstanding) %></div>
             </div>
             <div class="card p-6">
-                <div class="text-gray-500 text-sm">OVERDUE</div>
+                <div class="text-gray-500 text-sm font-bold mb-1">OVERDUE</div>
                 <div class="text-2xl font-bold text-red-500"><%= formatRupiah(stats.overdue) %></div>
             </div>
         </div>
 
         <h3 class="mt-8 mb-4">Recent Invoices</h3>
-        <div class="card">
+        
+        <!-- Wrapper overflow-x-auto agar tabel bisa di-swipe di HP -->
+        <div class="card overflow-x-auto mb-8">
             <table class="table">
                 <thead>
                     <tr>
@@ -52,22 +68,29 @@
                         <th>Due Date</th>
                         <th>Total</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% recentInvoices.forEach(inv => { %>
-                    <tr>
-                        <td><%= inv.number %></td>
-                        <td><%= formatDate(inv.invoiceDate) %></td>
-                        <td><%= formatDate(inv.dueDate) %></td>
-                        <td><%= formatRupiah(inv.total) %></td>
-                        <td><span class="badge badge-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
-                        <td><a href="/invoices/<%= inv.id %>" class="text-blue-500">View</a></td>
-                    </tr>
-                    <% }) %>
-                    <% if(recentInvoices.length === 0) { %>
-                        <tr><td colspan="6" class="text-center text-gray-500 py-4">Belum ada invoice.</td></tr>
+                    <% if(recentInvoices && recentInvoices.length > 0) { %>
+                        <% recentInvoices.forEach(inv => { %>
+                        <tr>
+                            <td class="font-medium"><%= inv.number %></td>
+                            <td><%= formatDate(inv.invoiceDate) %></td>
+                            <td><%= formatDate(inv.dueDate) %></td>
+                            <td class="font-bold"><%= formatRupiah(inv.total) %></td>
+                            <td><span class="badge badge-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
+                            <td class="text-center">
+                                <a href="/invoices/<%= inv.id %>" class="btn btn-sm btn-outline">View</a>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" class="text-center text-gray-500 py-6">
+                                Belum ada data invoice. Silakan buat invoice baru.
+                            </td>
+                        </tr>
                     <% } %>
                 </tbody>
             </table>
