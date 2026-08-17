@@ -99,18 +99,15 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
   
-  // Prioritize ADMIN_USER and ADMIN_PASS, fallback to older variables
-  const adminIdentifier = process.env.ADMIN_USER || process.env.ADMIN_EMAIL;
-  const adminPassword = process.env.ADMIN_PASS || process.env.ADMIN_PASSWORD;
-
-  if (email === adminIdentifier && password === adminPassword) {
-    req.session.user = { email, role: 'admin' };
+  // Strict checking menggunakan ADMIN_USER dan ADMIN_PASS
+  if (username === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) {
+    req.session.user = { username, role: 'admin' };
     return res.redirect('/dashboard');
   }
   
-  req.session.error = 'Email/Username atau password salah.';
+  req.session.error = 'Username atau password salah.';
   res.redirect('/login');
 });
 
