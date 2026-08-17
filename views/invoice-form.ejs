@@ -49,13 +49,12 @@
                     <table class="table w-full text-sm" id="itemsTable">
                         <thead>
                             <tr>
-                                <th>Description</th>
-                                <th>Period</th>
-                                <th>Qty</th>
-                                <th>Price</th>
-                                <th>Disc (%)</th>
-                                <th>Tax (%)</th>
-                                <th>Total</th>
+                                <th>Item / Description</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-right">Price (Rp)</th>
+                                <th class="text-center">Disc (%)</th>
+                                <th class="text-center">Tax (%)</th>
+                                <th class="text-right">Total</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -92,8 +91,14 @@
     
     <script src="/js/invoice.js"></script>
     <script>
-        // Initialize one item row
-        window.onload = () => addItem();
+        // Initialize one item row safely (mencegah error di Canvas Preview)
+        window.onload = () => {
+            if (typeof addItem === 'function') {
+                addItem();
+            } else {
+                console.log("Canvas Preview Mode: Eksternal JS tidak dimuat. Form dinamis ini akan berfungsi penuh 100% saat dijalankan di server Node.js atau Vercel.");
+            }
+        };
     </script>
 </body>
 </html>
