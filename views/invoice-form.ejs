@@ -19,7 +19,8 @@
         </div>
     </nav>
 
-    <div class="container mt-8 mb-8">
+    <!-- Ditambahkan mb-12 agar ruang bawah lega, mengatasi button tertimpah layar -->
+    <div class="container mt-8 mb-12">
         <h2>Buat Invoice Baru</h2>
         <form action="/invoices" method="POST" class="mt-4" id="invoiceForm">
             <div class="card p-6 mb-6 grid grid-cols-3 gap-6">
@@ -70,7 +71,8 @@
                 <div>
                     <div class="form-group card p-4">
                         <label>Notes</label>
-                        <textarea name="notes" class="form-control" rows="4"><%= settings.notes || '' %></textarea>
+                        <!-- Ditambahkan Placeholder -->
+                        <textarea name="notes" class="form-control" placeholder="Catatan tambahan untuk ditampilkan pada invoice..." rows="4"><%= settings.notes || '' %></textarea>
                     </div>
                 </div>
                 <div class="card p-6 bg-gray-50">
