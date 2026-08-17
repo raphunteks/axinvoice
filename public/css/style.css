@@ -51,6 +51,7 @@ body {
 .mb-4 { margin-bottom: 1rem; } 
 .mb-6 { margin-bottom: 1.5rem; } 
 .mb-8 { margin-bottom: 2rem; }
+.mb-12 { margin-bottom: 3rem; } /* Solusi padding bawah agar form tidak terpotong */
 .p-4 { padding: 1rem; } 
 .p-6 { padding: 1.5rem; } 
 .p-8 { padding: 2rem; }
@@ -165,6 +166,10 @@ h1, h2, h3, h4 { color: var(--primary); font-weight: 700; line-height: 1.2; }
     font-size: 0.95rem;
     transition: all 0.2s ease;
     background: #fdfdfd;
+}
+.form-control::placeholder {
+    color: #94a3b8; /* Elegan Placeholder Color */
+    opacity: 1;
 }
 .form-control:focus { 
     outline: none; 
@@ -310,6 +315,7 @@ textarea.form-control {
 
     /* Utility adjustments */
     .mt-8 { margin-top: 1.5rem; }
+    .mb-12 { margin-bottom: 2rem; } /* Sesuaikan margin bawah untuk layar HP */
     .p-6, .p-8 { padding: 1.25rem; }
     h2 { font-size: 1.5rem; }
 
@@ -320,4 +326,3 @@ textarea.form-control {
     }
     .max-w-md { max-width: 100%; }
 }
-```
