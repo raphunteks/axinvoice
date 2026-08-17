@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - <%= settings.businessName %></title>
+    <title>Dashboard - <%= settings.businessName || 'AXA XYZ' %></title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="min-h-screen">
-    <%- include('partials/nav') || `
     <nav class="navbar">
         <div class="container nav-content">
-            <div class="brand">${settings.businessName}</div>
+            <div class="brand"><%= settings.businessName || 'AXA XYZ' %></div>
             <div class="nav-links">
                 <a href="/dashboard">Dashboard</a>
                 <a href="/customers">Customers</a>
@@ -21,7 +20,7 @@
                 </form>
             </div>
         </div>
-    </nav>` %>
+    </nav>
 
     <div class="container mt-8">
         <div class="flex justify-between items-center mb-6">
@@ -58,7 +57,6 @@
 
         <h3 class="mt-8 mb-4">Recent Invoices</h3>
         
-        <!-- Wrapper overflow-x-auto agar tabel bisa di-swipe di HP -->
         <div class="card overflow-x-auto mb-8">
             <table class="table">
                 <thead>
