@@ -12,8 +12,8 @@ const app = express();
 // 1. CONFIGURATION & SERVICES
 // ==========================================
 const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
 app.set('view engine', 'ejs');
@@ -47,12 +47,19 @@ app.use(async (req, res, next) => {
   req.session.success = null;
   req.session.error = null;
   
-  // Load settings globally
-  let settings = await redis.get('axa:settings');
-  if (!settings) {
-    settings = { businessName: 'AXA XYZ', invoicePrefix: 'AXZ' };
+  // Load settings globally with Fail-Safe Try/Catch
+  try {
+    let settings = await redis.get('axa:settings');
+    if (!settings) {
+      settings = { businessName: 'AXA XYZ', invoicePrefix: 'AXZ' };
+    }
+    res.locals.settings = settings;
+  } catch (dbError) {
+    console.error('🔴 REDIS CONNECTION ERROR IN MIDDLEWARE:', dbError.message);
+    // Fallback if database is unreachable so the app doesn't crash 500 completely
+    res.locals.settings = { businessName: 'AXA XYZ (DB Offline)', invoicePrefix: 'AXZ' };
   }
-  res.locals.settings = settings;
+  
   next();
 });
 
@@ -89,11 +96,17 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+  
+  // Prioritize ADMIN_USER and ADMIN_PASS, fallback to older variables
+  const adminIdentifier = process.env.ADMIN_USER || process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASS || process.env.ADMIN_PASSWORD;
+
+  if (email === adminIdentifier && password === adminPassword) {
     req.session.user = { email, role: 'admin' };
     return res.redirect('/dashboard');
   }
-  req.session.error = 'Email atau password salah.';
+  
+  req.session.error = 'Email/Username atau password salah.';
   res.redirect('/login');
 });
 
@@ -329,8 +342,8 @@ app.post('/settings', requireAuth, async (req, res) => {
 // 9. ERROR HANDLING
 // ==========================================
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Terjadi kesalahan pada server.');
+  console.error('🔥 FATAL SERVER ERROR:', err.stack);
+  res.status(500).send('Terjadi kesalahan pada server. Silakan cek Application Logs di Vercel.');
 });
 
 // Export for Vercel
