@@ -38,19 +38,30 @@ function addItem() {
     const tbody = document.getElementById('itemsBody');
     const index = tbody.children.length;
     
-    // Ditambahkan placeholder ekstensif dan set diskon default selalu "0" secara eksplisit
+    // Ditambahkan min-width inline agar kolom input tidak akan pernah menimpa satu sama lain
+    // Serta menempatkan default disc 0 di kolom yang TEPAT
     const tr = document.createElement('tr');
     tr.innerHTML = `
-        <td>
-            <input type="text" name="items[${index}][description]" class="form-control mb-1 text-sm" placeholder="Deskripsi layanan / barang..." required>
-            <input type="text" name="items[${index}][period]" class="form-control text-xs" placeholder="Opsional (Mis: Jan 2026)">
+        <td style="min-width: 250px;">
+            <input type="text" name="items[${index}][description]" class="form-control mb-1 text-sm" placeholder="Nama Layanan / Barang..." required>
+            <input type="text" name="items[${index}][period]" class="form-control text-xs" placeholder="Period (Opsional, cth: Jan 2026)">
         </td>
-        <td class="w-16"><input type="number" name="items[${index}][quantity]" class="form-control qty text-sm" placeholder="1" value="1" min="1" oninput="calculateInvoice()"></td>
-        <td class="w-32"><input type="number" name="items[${index}][price]" class="form-control price text-sm" placeholder="Nominal Rp" value="0" min="0" oninput="calculateInvoice()"></td>
-        <td class="w-20"><input type="number" name="items[${index}][discount]" class="form-control disc text-sm" placeholder="0" value="0" min="0" oninput="calculateInvoice()"></td>
-        <td class="w-20"><input type="number" step="0.1" name="items[${index}][taxRate]" class="form-control tax text-sm" placeholder="11" value="11" min="0" oninput="calculateInvoice()"></td>
-        <td class="w-32 text-right font-medium line-total pt-3">Rp 0</td>
-        <td class="w-10 text-center pt-3"><button type="button" class="text-red-500 font-bold" onclick="this.closest('tr').remove(); calculateInvoice();">X</button></td>
+        <td style="min-width: 80px;">
+            <input type="number" name="items[${index}][quantity]" class="form-control qty text-sm text-center" placeholder="1" value="1" min="1" oninput="calculateInvoice()">
+        </td>
+        <td style="min-width: 150px;">
+            <input type="number" name="items[${index}][price]" class="form-control price text-sm text-right" placeholder="0" value="0" min="0" oninput="calculateInvoice()">
+        </td>
+        <td style="min-width: 80px;">
+            <input type="number" name="items[${index}][discount]" class="form-control disc text-sm text-center" placeholder="0" value="0" min="0" oninput="calculateInvoice()">
+        </td>
+        <td style="min-width: 80px;">
+            <input type="number" step="0.1" name="items[${index}][taxRate]" class="form-control tax text-sm text-center" placeholder="11" value="11" min="0" oninput="calculateInvoice()">
+        </td>
+        <td class="text-right font-medium line-total pt-3" style="min-width: 120px;">Rp 0</td>
+        <td class="text-center pt-2">
+            <button type="button" class="btn btn-sm btn-outline text-red-500" style="padding: 4px 8px; border-color: var(--danger);" onclick="this.closest('tr').remove(); calculateInvoice();" title="Hapus baris ini">X</button>
+        </td>
     `;
     tbody.appendChild(tr);
     calculateInvoice();
