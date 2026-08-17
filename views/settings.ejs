@@ -22,7 +22,8 @@
         </div>
     </nav>
 
-    <div class="container mt-8 max-w-3xl mb-8">
+    <!-- Ditambahkan mb-12 -->
+    <div class="container mt-8 max-w-3xl mb-12">
         <h2>System Settings</h2>
         
         <% if(typeof success !== 'undefined' && success) { %>
@@ -33,32 +34,32 @@
             <div class="card p-6">
                 <h3 class="mb-4 font-bold border-b pb-2 text-primary">Business Identity</h3>
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="form-group"><label>Business Name</label><input type="text" name="businessName" class="form-control" value="<%= settings.businessName || '' %>" required></div>
-                    <div class="form-group"><label>NPWP</label><input type="text" name="npwp" class="form-control" value="<%= settings.npwp || '' %>"></div>
-                    <div class="form-group"><label>Email</label><input type="email" name="businessEmail" class="form-control" value="<%= settings.businessEmail || '' %>"></div>
-                    <div class="form-group"><label>Phone</label><input type="text" name="businessPhone" class="form-control" value="<%= settings.businessPhone || '' %>"></div>
-                    <div class="form-group col-span-2"><label>Address</label><textarea name="businessAddress" class="form-control"><%= settings.businessAddress || '' %></textarea></div>
+                    <div class="form-group"><label>Business Name</label><input type="text" name="businessName" class="form-control" placeholder="Contoh: AXA XYZ Corp" value="<%= settings.businessName || '' %>" required></div>
+                    <div class="form-group"><label>NPWP</label><input type="text" name="npwp" class="form-control" placeholder="Nomor NPWP Perusahaan" value="<%= settings.npwp || '' %>"></div>
+                    <div class="form-group"><label>Email</label><input type="email" name="businessEmail" class="form-control" placeholder="admin@axaxyz.com" value="<%= settings.businessEmail || '' %>"></div>
+                    <div class="form-group"><label>Phone</label><input type="text" name="businessPhone" class="form-control" placeholder="Contoh: 081234567890" value="<%= settings.businessPhone || '' %>"></div>
+                    <div class="form-group col-span-2"><label>Address</label><textarea name="businessAddress" class="form-control" placeholder="Alamat resmi perusahaan lengkap..."><%= settings.businessAddress || '' %></textarea></div>
                 </div>
             </div>
 
             <div class="card p-6">
                 <h3 class="mb-4 font-bold border-b pb-2 text-primary">Payment Information</h3>
                 <div class="grid grid-cols-3 gap-4">
-                    <div class="form-group"><label>Bank Name</label><input type="text" name="bankName" class="form-control" value="<%= settings.bankName || '' %>"></div>
-                    <div class="form-group"><label>Account Number</label><input type="text" name="bankAccount" class="form-control" value="<%= settings.bankAccount || '' %>"></div>
-                    <div class="form-group"><label>Account Name</label><input type="text" name="bankAccountName" class="form-control" value="<%= settings.bankAccountName || '' %>"></div>
+                    <div class="form-group"><label>Bank Name</label><input type="text" name="bankName" class="form-control" placeholder="Contoh: BCA / Mandiri" value="<%= settings.bankName || '' %>"></div>
+                    <div class="form-group"><label>Account Number</label><input type="text" name="bankAccount" class="form-control" placeholder="Nomor Rekening" value="<%= settings.bankAccount || '' %>"></div>
+                    <div class="form-group"><label>Account Name</label><input type="text" name="bankAccountName" class="form-control" placeholder="Atas Nama (Mis: PT AXA)" value="<%= settings.bankAccountName || '' %>"></div>
                 </div>
             </div>
 
             <div class="card p-6">
                 <h3 class="mb-4 font-bold border-b pb-2 text-primary">Invoice Defaults</h3>
                 <div class="grid grid-cols-3 gap-4 mb-4">
-                    <div class="form-group"><label>Invoice Prefix</label><input type="text" name="invoicePrefix" class="form-control" value="<%= settings.invoicePrefix || 'AXZ' %>"></div>
-                    <div class="form-group"><label>Default Tax Name</label><input type="text" name="defaultTaxName" class="form-control" value="<%= settings.defaultTaxName || 'PPN' %>"></div>
-                    <div class="form-group"><label>Default Tax Rate (%)</label><input type="number" name="defaultTaxRate" class="form-control" value="<%= settings.defaultTaxRate || 0 %>"></div>
+                    <div class="form-group"><label>Invoice Prefix</label><input type="text" name="invoicePrefix" class="form-control" placeholder="Contoh: AXZ" value="<%= settings.invoicePrefix || 'AXZ' %>"></div>
+                    <div class="form-group"><label>Default Tax Name</label><input type="text" name="defaultTaxName" class="form-control" placeholder="Contoh: PPN" value="<%= settings.defaultTaxName || 'PPN' %>"></div>
+                    <div class="form-group"><label>Default Tax Rate (%)</label><input type="number" name="defaultTaxRate" class="form-control" placeholder="Contoh: 11" value="<%= settings.defaultTaxRate || 0 %>"></div>
                 </div>
-                <div class="form-group mb-4"><label>Default Notes</label><textarea name="notes" class="form-control" rows="3"><%= settings.notes || '' %></textarea></div>
-                <div class="form-group"><label>Terms & Conditions</label><textarea name="terms" class="form-control" rows="3"><%= settings.terms || '' %></textarea></div>
+                <div class="form-group mb-4"><label>Default Notes</label><textarea name="notes" class="form-control" rows="3" placeholder="Catatan standar yang muncul di bawah invoice..."><%= settings.notes || '' %></textarea></div>
+                <div class="form-group"><label>Terms & Conditions</label><textarea name="terms" class="form-control" rows="3" placeholder="Syarat dan ketentuan standar pembayaran..."><%= settings.terms || '' %></textarea></div>
             </div>
 
             <button type="submit" class="btn btn-primary ml-auto block px-8">Save Settings</button>
