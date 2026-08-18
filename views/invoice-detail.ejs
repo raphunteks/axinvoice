@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice <%= invoice.number %></title>
+    <!-- Favicon Global Injection -->
+    <link rel="icon" type="image/png" href="/img/axalogo.png">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/invoice.css">
 </head>
@@ -18,7 +20,6 @@
         </div>
     </nav>
 
-    <!-- Ditambahkan mb-12 -->
     <div class="container mt-8 mb-12 flex gap-6 hide-print">
         <div class="w-3/4">
             <% if(typeof success !== 'undefined' && success) { %><div class="alert alert-success mb-4"><%= success %></div><% } %>
@@ -53,33 +54,33 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="invoice-table mb-8 w-full">
-                        <thead>
-                            <tr>
-                                <th>Description</th>
-                                <th class="text-center">Qty</th>
-                                <th class="text-right">Price</th>
-                                <th class="text-right">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% invoice.items.forEach(item => { %>
-                            <tr>
-                                <td>
-                                    <b><%= item.description %></b>
-                                    <% if(item.period) { %><div class="text-xs text-gray-500 mt-1"><%= item.period %></div><% } %>
-                                </td>
-                                <td class="text-center"><%= item.quantity %></td>
-                                <td class="text-right"><%= formatRupiah(item.price) %></td>
-                                <td class="text-right font-medium"><%= formatRupiah(item.total) %></td>
-                            </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
+                <!-- Wrapper overflow diserahkan pada CSS Media Queries -->
+                <table class="invoice-table mb-8 w-full">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-right">Price</th>
+                            <th class="text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% invoice.items.forEach(item => { %>
+                        <tr>
+                            <td>
+                                <b><%= item.description %></b>
+                                <% if(item.period) { %><div class="text-xs text-gray-500 mt-1"><%= item.period %></div><% } %>
+                            </td>
+                            <td class="text-center"><%= item.quantity %></td>
+                            <td class="text-right"><%= formatRupiah(item.price) %></td>
+                            <td class="text-right font-medium"><%= formatRupiah(item.total) %></td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
 
-                <div class="flex justify-end mb-8">
+                <div class="flex justify-end mb-8 gap-8">
+                    <div class="w-1/2 hidden md:block"></div>
                     <div class="w-1/2">
                         <table class="w-full text-right text-sm">
                             <tr><td class="py-1 text-gray-600">Subtotal</td><td class="py-1 font-medium"><%= formatRupiah(invoice.subtotal) %></td></tr>
@@ -111,8 +112,14 @@
                 <% } %>
 
                 <% if(invoice.status !== 'DRAFT') { %>
-                <a href="/invoices/<%= invoice.id %>/print" target="_blank" class="btn btn-outline w-full mb-3 block text-center">Print / PDF</a>
-                <button id="copyBtn" onclick="copyLink()" class="btn btn-outline w-full mb-2 bg-gray-50">Copy Public Link</button>
+                    <a href="/invoices/<%= invoice.id %>/print" target="_blank" class="btn btn-outline w-full mb-3 block text-center">Print / PDF Invoice</a>
+                    
+                    <!-- FITUR BARU: PRINT RECEIPT (HANYA JIKA LUNAS) -->
+                    <% if(invoice.status === 'PAID') { %>
+                        <a href="/invoices/<%= invoice.id %>/receipt" target="_blank" class="btn btn-primary w-full mb-3 block text-center" style="background: var(--success); border-color: var(--success);">Print Official Receipt</a>
+                    <% } %>
+
+                    <button id="copyBtn" onclick="copyLink()" class="btn btn-outline w-full mb-2 bg-gray-50">Copy Public Link</button>
                 <% } %>
             </div>
 
@@ -134,7 +141,6 @@
                     </div>
                     <div class="form-group">
                         <label>Ref / Note</label>
-                        <!-- Ditambahkan Placeholder -->
                         <input type="text" name="reference" class="form-control" placeholder="Contoh: TRF BCA 1234 / Tunai">
                     </div>
                     <button type="submit" class="btn btn-primary w-full mt-2">Save Payment</button>
@@ -145,7 +151,6 @@
     </div>
 
     <script>
-        // UI Feedback modern tanpa alert
         function copyLink() {
             const url = window.location.origin + '/invoice/<%= invoice.publicId %>';
             window.navigator.clipboard.writeText(url).then(() => {
@@ -157,9 +162,7 @@
                     btn.innerText = originalText;
                     btn.classList.remove('bg-green-100', 'text-green-800');
                 }, 2000);
-            }).catch(err => {
-                console.error('Copy failed', err);
-            });
+            }).catch(err => { console.error('Copy failed', err); });
         }
     </script>
 </body>
