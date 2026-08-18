@@ -8,92 +8,61 @@ const path = require('path');
 
 const app = express();
 
-// ==========================================
-// 1. CONFIGURATION & SERVICES
-// ==========================================
-// Fail-safe Redis initialization: Mengambil dari Vercel KV Env Variables
 const redis = new Redis({
   url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || 'https://dummy-url.upstash.io',
   token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || 'dummy-token',
 });
 
-// TRUST PROXY WAJIB UNTUK VERCEL!
 app.set('trust proxy', 1); 
-
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Security Headers (Helmet)
-app.use(helmet({
-  contentSecurityPolicy: false, 
-}));
+app.use(helmet({ contentSecurityPolicy: false }));
 
-// Ignore Favicon 404 Logs to keep Vercel logs clean
 app.get('/favicon.ico', (req, res) => res.status(204).end());
-app.get('/favicon.png', (req, res) => res.status(204).end());
+// Favicon PNG kini akan dihandle oleh file statis di public/img/axalogo.png
 
-
-// ==========================================
-// 2. UPSTASH REDIS SESSION STORE (CUSTOM ENGINE)
-// ==========================================
-// Mencegah auto-logout di Vercel dengan menyimpan Sesi ke Redis Database
 const Store = session.Store;
 class UpstashSessionStore extends Store {
   constructor(options = {}) {
     super(options);
     this.client = options.client;
     this.prefix = options.prefix || 'axa:session:';
-    this.ttl = options.ttl || 86400; // 24 hours (Sesi bertahan 1 hari)
+    this.ttl = options.ttl || 86400; 
   }
-
   async get(sid, callback) {
     try {
       let data = await this.client.get(this.prefix + sid);
       if (!data) return callback(null, null);
       if (typeof data === 'string') data = JSON.parse(data);
       return callback(null, data);
-    } catch (err) {
-      return callback(err);
-    }
+    } catch (err) { return callback(err); }
   }
-
   async set(sid, sessionData, callback) {
     try {
       await this.client.set(this.prefix + sid, JSON.stringify(sessionData), { ex: this.ttl });
       return callback(null);
-    } catch (err) {
-      return callback(err);
-    }
+    } catch (err) { return callback(err); }
   }
-
   async destroy(sid, callback) {
     try {
       await this.client.del(this.prefix + sid);
       return callback(null);
-    } catch (err) {
-      return callback(err);
-    }
+    } catch (err) { return callback(err); }
   }
 }
 
-// Session Management (Kini menggunakan UpstashSessionStore!)
 app.use(session({
   store: new UpstashSessionStore({ client: redis }),
   secret: process.env.SESSION_SECRET || 'fallback-secret-development-only',
   resave: false,
   saveUninitialized: false,
-  cookie: { 
-    httpOnly: true, 
-    secure: process.env.NODE_ENV === 'production', 
-    sameSite: 'lax',
-    maxAge: 24 * 60 * 60 * 1000 // Sesi aktif selama 24 jam
-  }
+  cookie: { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 }
 }));
 
-// Flash messages & Global UI variables middleware
 app.use(async (req, res, next) => {
   res.locals.user = req.session.user || null;
   res.locals.success = req.session.success || null;
@@ -101,46 +70,31 @@ app.use(async (req, res, next) => {
   req.session.success = null;
   req.session.error = null;
   
-  // Load settings globally with Fail-Safe Try/Catch
   try {
     let settings = await redis.get('axa:settings');
-    if (!settings) {
-      settings = { businessName: 'AXA XYZ', invoicePrefix: 'AXZ' };
-    }
+    if (!settings) settings = { businessName: 'AXA XYZ', invoicePrefix: 'AXZ' };
     res.locals.settings = settings;
   } catch (dbError) {
-    console.error('🔴 REDIS CONNECTION ERROR IN MIDDLEWARE:', dbError.message);
     res.locals.settings = { businessName: 'AXA XYZ (DB Offline)', invoicePrefix: 'AXZ' };
   }
-  
   next();
 });
 
-// ==========================================
-// 3. MIDDLEWARES & HELPERS
-// ==========================================
 const requireAuth = (req, res, next) => {
   if (!req.session.user) return res.redirect('/login');
   next();
 };
 
-const formatRupiah = (amount) => {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
-};
+const formatRupiah = (amount) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
 app.locals.formatRupiah = formatRupiah;
 app.locals.formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('id-ID') : '';
 
 const checkOverdue = (invoice) => {
   if (invoice.status === 'PAID') return invoice;
-  if (invoice.balance > 0 && new Date(invoice.dueDate) < new Date() && invoice.status !== 'DRAFT') {
-    invoice.status = 'OVERDUE';
-  }
+  if (invoice.balance > 0 && new Date(invoice.dueDate) < new Date() && invoice.status !== 'DRAFT') invoice.status = 'OVERDUE';
   return invoice;
 };
 
-// ==========================================
-// 4. AUTH ROUTES
-// ==========================================
 app.get('/login', (req, res) => {
   if (req.session.user) return res.redirect('/dashboard');
   res.render('login');
@@ -148,12 +102,10 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
-  
   if (username === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) {
     req.session.user = { username, role: 'admin' };
     return res.redirect('/dashboard');
   }
-  
   req.session.error = 'Username atau password salah.';
   res.redirect('/login');
 });
@@ -163,27 +115,15 @@ app.post('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-app.get('/', (req, res) => {
-  res.redirect('/dashboard');
-});
+app.get('/', (req, res) => res.redirect('/dashboard'));
 
-// ==========================================
-// 5. DASHBOARD
-// ==========================================
 app.get('/dashboard', requireAuth, async (req, res) => {
   try {
     const invoiceIds = await redis.lrange('axa:invoices', 0, -1);
     let invoices = invoiceIds.length ? await Promise.all(invoiceIds.map(id => redis.get(`axa:invoice:${id}`))) : [];
     invoices = invoices.filter(i => i).map(checkOverdue);
 
-    const stats = {
-      totalInvoices: invoices.length,
-      totalBilled: 0,
-      totalPaid: 0,
-      outstanding: 0,
-      overdue: 0
-    };
-
+    const stats = { totalInvoices: invoices.length, totalBilled: 0, totalPaid: 0, outstanding: 0, overdue: 0 };
     invoices.forEach(inv => {
       if (inv.status !== 'DRAFT') stats.totalBilled += inv.total;
       stats.totalPaid += inv.amountPaid;
@@ -194,32 +134,21 @@ app.get('/dashboard', requireAuth, async (req, res) => {
     const recentInvoices = invoices.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
     res.render('dashboard', { stats, recentInvoices });
   } catch (error) {
-    console.error('🔥 DASHBOARD ERROR:', error.message);
-    res.render('dashboard', { 
-      stats: { totalInvoices: 0, totalBilled: 0, totalPaid: 0, outstanding: 0, overdue: 0 }, 
-      recentInvoices: [],
-      error: 'Gagal memuat data dari database. Silakan muat ulang halaman.'
-    });
+    res.render('dashboard', { stats: { totalInvoices: 0, totalBilled: 0, totalPaid: 0, outstanding: 0, overdue: 0 }, recentInvoices: [], error: 'Gagal memuat data.' });
   }
 });
 
-// ==========================================
-// 6. CUSTOMERS
-// ==========================================
 app.get('/customers', requireAuth, async (req, res) => {
   try {
     const ids = await redis.lrange('axa:customers', 0, -1);
     let customers = ids.length ? await Promise.all(ids.map(id => redis.get(`axa:customer:${id}`))) : [];
     res.render('customers', { customers: customers.filter(c => c) });
   } catch (error) {
-    console.error('🔥 CUSTOMERS LIST ERROR:', error.message);
     res.render('customers', { customers: [], error: 'Gagal memuat data pelanggan.' });
   }
 });
 
-app.get('/customers/new', requireAuth, (req, res) => {
-  res.render('customer-form', { customer: {} });
-});
+app.get('/customers/new', requireAuth, (req, res) => res.render('customer-form', { customer: {} }));
 
 app.post('/customers', requireAuth, async (req, res) => {
   try {
@@ -238,11 +167,9 @@ app.post('/customers', requireAuth, async (req, res) => {
 app.get('/customers/:id/edit', requireAuth, async (req, res) => {
   try {
     const customer = await redis.get(`axa:customer:${req.params.id}`);
-    if (!customer) return res.status(404).send('Customer tidak ditemukan');
+    if (!customer) return res.status(404).send('Not found');
     res.render('customer-form', { customer });
-  } catch (error) {
-    res.redirect('/customers');
-  }
+  } catch (error) { res.redirect('/customers'); }
 });
 
 app.post('/customers/:id/edit', requireAuth, async (req, res) => {
@@ -250,21 +177,15 @@ app.post('/customers/:id/edit', requireAuth, async (req, res) => {
     const existing = await redis.get(`axa:customer:${req.params.id}`);
     const customer = { ...existing, ...req.body, updatedAt: new Date().toISOString() };
     await redis.set(`axa:customer:${req.params.id}`, customer);
-    req.session.success = 'Customer berhasil diupdate.';
+    req.session.success = 'Customer diupdate.';
     res.redirect('/customers');
-  } catch(error) {
-    res.redirect('/customers');
-  }
+  } catch(error) { res.redirect('/customers'); }
 });
 
-// ==========================================
-// 7. INVOICES
-// ==========================================
 app.get('/invoices', requireAuth, async (req, res) => {
   try {
     const ids = await redis.lrange('axa:invoices', 0, -1);
     let invoices = ids.length ? await Promise.all(ids.map(id => redis.get(`axa:invoice:${id}`))) : [];
-    
     for(let inv of invoices) {
       if(inv) {
           inv = checkOverdue(inv);
@@ -274,8 +195,7 @@ app.get('/invoices', requireAuth, async (req, res) => {
     }
     res.render('invoices', { invoices: invoices.filter(i=>i).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)) });
   } catch (error) {
-    console.error('🔥 INVOICES ERROR:', error.message);
-    res.render('invoices', { invoices: [], error: 'Gagal memuat data invoice.' });
+    res.render('invoices', { invoices: [], error: 'Gagal memuat data.' });
   }
 });
 
@@ -284,9 +204,7 @@ app.get('/invoices/new', requireAuth, async (req, res) => {
     const cids = await redis.lrange('axa:customers', 0, -1);
     const customers = cids.length ? await Promise.all(cids.map(id => redis.get(`axa:customer:${id}`))) : [];
     res.render('invoice-form', { invoice: { items: [] }, customers: customers.filter(c=>c) });
-  } catch (error) {
-    res.redirect('/invoices');
-  }
+  } catch (error) { res.redirect('/invoices'); }
 });
 
 app.post('/invoices', requireAuth, async (req, res) => {
@@ -300,31 +218,24 @@ app.post('/invoices', requireAuth, async (req, res) => {
     
     const { customerId, invoiceDate, dueDate, items, notes } = req.body;
     
-    let subtotal = 0;
-    let tax = 0;
-    const processedItems = [];
-    
+    let subtotal = 0; let tax = 0; const processedItems = [];
     if (items && Array.isArray(items)) {
       items.forEach(item => {
           const qty = parseInt(item.quantity) || 0;
           const price = parseInt(item.price) || 0;
           const discount = parseInt(item.discount) || 0;
           const taxRate = parseFloat(item.taxRate) || 0;
-          
           const lineSubtotal = qty * price;
           const lineDiscount = Math.round((lineSubtotal * discount) / 100);
           const lineNet = lineSubtotal - lineDiscount;
           const lineTax = Math.round((lineNet * taxRate) / 100);
           const total = lineNet + lineTax;
-          
-          subtotal += lineNet;
-          tax += lineTax;
+          subtotal += lineNet; tax += lineTax;
           processedItems.push({ ...item, quantity: qty, price, discount, taxRate, total });
       });
     }
 
     const grandTotal = subtotal + tax;
-
     const invoice = {
       id, publicId, number, status: 'DRAFT', customerId, invoiceDate, dueDate, currency: 'IDR',
       items: processedItems, subtotal, discount: 0, taxableBase: subtotal, tax, additionalFee: 0, total: grandTotal,
@@ -333,25 +244,19 @@ app.post('/invoices', requireAuth, async (req, res) => {
 
     await redis.set(`axa:invoice:${id}`, invoice);
     await redis.lpush('axa:invoices', id);
-    
     req.session.success = 'Invoice berhasil dibuat.';
     res.redirect('/invoices');
-  } catch(error) {
-    req.session.error = 'Gagal memproses pembuatan invoice.';
-    res.redirect('/invoices');
-  }
+  } catch(error) { res.redirect('/invoices'); }
 });
 
 app.get('/invoices/:id', requireAuth, async (req, res) => {
   try {
     let invoice = await redis.get(`axa:invoice:${req.params.id}`);
-    if (!invoice) return res.status(404).send('Invoice Not Found');
+    if (!invoice) return res.status(404).send('Not Found');
     invoice = checkOverdue(invoice);
     const customer = await redis.get(`axa:customer:${invoice.customerId}`);
     res.render('invoice-detail', { invoice, customer });
-  } catch (error) {
-    res.redirect('/invoices');
-  }
+  } catch (error) { res.redirect('/invoices'); }
 });
 
 app.post('/invoices/:id/issue', requireAuth, async (req, res) => {
@@ -390,9 +295,7 @@ app.post('/invoices/:id/payment', requireAuth, async (req, res) => {
 
     await redis.set(`axa:invoice:${req.params.id}`, invoice);
     req.session.success = 'Pembayaran dicatat.';
-  } catch(err) {
-    req.session.error = 'Gagal mencatat pembayaran.';
-  }
+  } catch(err) { req.session.error = 'Gagal mencatat pembayaran.'; }
   res.redirect(`/invoices/${req.params.id}`);
 });
 
@@ -401,14 +304,19 @@ app.get('/invoices/:id/print', requireAuth, async (req, res) => {
     const invoice = await redis.get(`axa:invoice:${req.params.id}`);
     const customer = await redis.get(`axa:customer:${invoice.customerId}`);
     res.render('invoice-print', { invoice, customer });
-  } catch (err) {
-    res.send('Error memuat print out.');
-  }
+  } catch (err) { res.send('Error.'); }
 });
 
-// ==========================================
-// 8. PUBLIC INVOICE
-// ==========================================
+// ROUTE BARU: OFFICIAL RECEIPT UNTUK ADMIN
+app.get('/invoices/:id/receipt', requireAuth, async (req, res) => {
+  try {
+    const invoice = await redis.get(`axa:invoice:${req.params.id}`);
+    if (invoice.status !== 'PAID') return res.redirect(`/invoices/${req.params.id}`);
+    const customer = await redis.get(`axa:customer:${invoice.customerId}`);
+    res.render('receipt-print', { invoice, customer });
+  } catch (err) { res.send('Error.'); }
+});
+
 app.get('/invoice/:publicId', async (req, res) => {
   try {
     const ids = await redis.lrange('axa:invoices', 0, -1);
@@ -416,47 +324,43 @@ app.get('/invoice/:publicId', async (req, res) => {
     let invoice = invoices.find(i => i && i.publicId === req.params.publicId);
     
     if (!invoice) return res.status(404).render('login', { error: 'Invoice Not Found' });
-    
     invoice = checkOverdue(invoice);
     const customer = await redis.get(`axa:customer:${invoice.customerId}`);
-    
     res.render('invoice-public', { invoice, customer });
-  } catch (err) {
-    res.status(500).send('Terjadi kesalahan muat public invoice.');
-  }
+  } catch (err) { res.status(500).send('Error.'); }
 });
 
-// ==========================================
-// 9. SETTINGS
-// ==========================================
-app.get('/settings', requireAuth, (req, res) => {
-  res.render('settings');
+// ROUTE BARU: OFFICIAL RECEIPT UNTUK CLIENT PUBLIC
+app.get('/invoice/:publicId/receipt', async (req, res) => {
+  try {
+    const ids = await redis.lrange('axa:invoices', 0, -1);
+    let invoices = ids.length ? await Promise.all(ids.map(id => redis.get(`axa:invoice:${id}`))) : [];
+    let invoice = invoices.find(i => i && i.publicId === req.params.publicId);
+    
+    if (!invoice || invoice.status !== 'PAID') return res.status(404).send('Receipt Unavailable');
+    const customer = await redis.get(`axa:customer:${invoice.customerId}`);
+    res.render('receipt-print', { invoice, customer });
+  } catch (err) { res.status(500).send('Error.'); }
 });
+
+app.get('/settings', requireAuth, (req, res) => res.render('settings'));
 
 app.post('/settings', requireAuth, async (req, res) => {
   try {
     const settings = { ...res.locals.settings, ...req.body };
     await redis.set('axa:settings', settings);
     req.session.success = 'Settings disimpan.';
-  } catch (err) {
-    req.session.error = 'Gagal menyimpan pengaturan.';
-  }
+  } catch (err) { req.session.error = 'Gagal menyimpan.'; }
   res.redirect('/settings');
 });
 
-// ==========================================
-// 10. ERROR HANDLING
-// ==========================================
 app.use((err, req, res, next) => {
-  console.error('🔥 FATAL SERVER ERROR:', err.stack);
-  res.status(500).send('Terjadi kesalahan pada server. Silakan cek Application Logs di Vercel.');
+  console.error('🔥 FATAL:', err.stack);
+  res.status(500).send('Error Server.');
 });
 
-// Export for Vercel
 module.exports = app;
-
-// Start local server
 if (require.main === module) {
   const port = process.env.PORT || 3000;
-  app.listen(port, () => console.log(`AXA XYZ Invoice running on port ${port}`));
+  app.listen(port, () => console.log(`AXA XYZ Invoice running on ${port}`));
 }
