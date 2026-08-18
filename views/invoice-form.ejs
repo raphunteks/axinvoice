@@ -53,8 +53,6 @@
                                 <th>Item / Description</th>
                                 <th class="text-center">Qty</th>
                                 <th class="text-right">Price (Rp)</th>
-                                <th class="text-center">Disc (%)</th>
-                                <th class="text-center">Tax (%)</th>
                                 <th class="text-right">Total</th>
                                 <th></th>
                             </tr>
@@ -75,10 +73,22 @@
                     </div>
                 </div>
                 <div class="card p-6 bg-gray-50">
-                    <div class="flex justify-between mb-2 text-gray-600"><span>Subtotal</span><span id="ui-subtotal">Rp 0</span></div>
-                    <div class="flex justify-between mb-2 text-gray-600"><span>Tax</span><span id="ui-tax">Rp 0</span></div>
+                    <div class="flex justify-between mb-2 text-gray-600 items-center"><span>Subtotal</span><span id="ui-subtotal">Rp 0</span></div>
+                    
+                    <div class="flex justify-between mb-2 text-gray-600 items-center">
+                        <span>Discount (%)</span>
+                        <input type="number" name="globalDiscountRate" id="globalDiscountRate" class="form-control text-right py-1" style="width: 80px; height: 32px;" value="<%= settings.defaultDiscRate || 0 %>" min="0" oninput="calculateInvoice()">
+                    </div>
+                    <div class="flex justify-between mb-2 text-gray-600 items-center"><span>Discount Amt</span><span id="ui-discount" class="text-red-500">- Rp 0</span></div>
+                    
+                    <div class="flex justify-between mb-2 text-gray-600 items-center">
+                        <span>Tax (<%= settings.defaultTaxName || 'Tax' %> %)</span>
+                        <input type="number" name="globalTaxRate" id="globalTaxRate" class="form-control text-right py-1" style="width: 80px; height: 32px;" value="<%= settings.defaultTaxRate || 0 %>" min="0" oninput="calculateInvoice()">
+                    </div>
+                    <div class="flex justify-between mb-2 text-gray-600 items-center"><span>Tax Amt</span><span id="ui-tax">Rp 0</span></div>
+                    
                     <hr class="my-4 border-gray-300">
-                    <div class="flex justify-between font-bold text-xl"><span>Grand Total</span><span id="ui-total" class="text-primary">Rp 0</span></div>
+                    <div class="flex justify-between font-bold text-xl items-center"><span>Grand Total</span><span id="ui-total" class="text-primary">Rp 0</span></div>
                 </div>
             </div>
 
