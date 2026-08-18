@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buat Invoice</title>
-    <!-- Injeksi Favicon Global -->
+    <!-- Title berubah otomatis antara Edit atau Buat -->
+    <title><%= invoice.id ? 'Edit Invoice' : 'Buat Invoice' %></title>
     <link rel="icon" type="image/png" href="/img/axalogo.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -22,25 +22,26 @@
     </nav>
 
     <div class="container mt-8 mb-12">
-        <h2>Buat Invoice Baru</h2>
-        <form action="/invoices" method="POST" class="mt-4" id="invoiceForm">
+        <h2><%= invoice.id ? 'Edit Invoice ' + invoice.number : 'Buat Invoice Baru' %></h2>
+        <!-- Form action dinamis: POST ke rute Create atau Edit -->
+        <form action="<%= invoice.id ? '/invoices/' + invoice.id + '/edit' : '/invoices' %>" method="POST" class="mt-4" id="invoiceForm">
             <div class="card p-6 mb-6 grid grid-cols-3 gap-6">
                 <div class="form-group">
                     <label>Customer *</label>
                     <select name="customerId" class="form-control" required>
                         <option value="">Pilih Customer...</option>
                         <% customers.forEach(c => { %>
-                            <option value="<%= c.id %>"><%= c.companyName %></option>
+                            <option value="<%= c.id %>" <%= invoice.customerId === c.id ? 'selected' : '' %>><%= c.companyName %></option>
                         <% }) %>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Invoice Date *</label>
-                    <input type="date" name="invoiceDate" class="form-control" required value="<%= new Date().toISOString().split('T')[0] %>">
+                    <input type="date" name="invoiceDate" class="form-control" required value="<%= invoice.invoiceDate ? invoice.invoiceDate.split('T')[0] : new Date().toISOString().split('T')[0] %>">
                 </div>
                 <div class="form-group">
                     <label>Due Date *</label>
-                    <input type="date" name="dueDate" class="form-control" required>
+                    <input type="date" name="dueDate" class="form-control" required value="<%= invoice.dueDate ? invoice.dueDate.split('T')[0] : '' %>">
                 </div>
             </div>
 
@@ -58,7 +59,29 @@
                             </tr>
                         </thead>
                         <tbody id="itemsBody">
-                            <!-- Items inserted by JS -->
+                            <!-- Pre-populate data jika sedang Edit Invoice -->
+                            <% if (invoice.items && invoice.items.length > 0) { %>
+                                <% invoice.items.forEach((item, index) => { %>
+                                    <tr>
+                                        <td style="min-width: 270px; white-space: normal; vertical-align: top;">
+                                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                                <input type="text" name="items[<%= index %>][description]" class="form-control text-sm" placeholder="Nama Layanan / Barang..." value="<%= item.description %>" required>
+                                                <input type="text" name="items[<%= index %>][period]" class="form-control text-xs" placeholder="Period (Opsional, cth: Jan 2026)" value="<%= item.period || '' %>">
+                                            </div>
+                                        </td>
+                                        <td style="min-width: 90px; vertical-align: top;">
+                                            <input type="number" name="items[<%= index %>][quantity]" class="form-control qty text-sm text-center" placeholder="1" value="<%= item.quantity %>" min="1" oninput="calculateInvoice()">
+                                        </td>
+                                        <td style="min-width: 150px; vertical-align: top;">
+                                            <input type="number" name="items[<%= index %>][price]" class="form-control price text-sm text-right" placeholder="0" value="<%= item.price %>" min="0" oninput="calculateInvoice()">
+                                        </td>
+                                        <td class="text-right font-medium line-total pt-3" style="min-width: 130px; vertical-align: top;">Rp 0</td>
+                                        <td class="text-center pt-2" style="vertical-align: top;">
+                                            <button type="button" class="btn btn-sm btn-outline text-red-500" style="padding: 4px 8px; border-color: var(--danger);" onclick="this.closest('tr').remove(); calculateInvoice();" title="Hapus baris ini">X</button>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } %>
                         </tbody>
                     </table>
                 </div>
@@ -69,7 +92,7 @@
                 <div>
                     <div class="form-group card p-4">
                         <label>Notes</label>
-                        <textarea name="notes" class="form-control" placeholder="Catatan tambahan untuk ditampilkan pada invoice..." rows="4"><%= settings.notes || '' %></textarea>
+                        <textarea name="notes" class="form-control" placeholder="Catatan tambahan untuk ditampilkan pada invoice..." rows="4"><%= invoice.id ? (invoice.notes || '') : (settings.notes || '') %></textarea>
                     </div>
                 </div>
                 <div class="card p-6 bg-gray-50">
@@ -77,13 +100,13 @@
                     
                     <div class="flex justify-between mb-2 text-gray-600 items-center">
                         <span>Discount (%)</span>
-                        <input type="number" name="globalDiscountRate" id="globalDiscountRate" class="form-control text-right py-1" style="width: 80px; height: 32px;" value="<%= settings.defaultDiscRate || 0 %>" min="0" oninput="calculateInvoice()">
+                        <input type="number" name="globalDiscountRate" id="globalDiscountRate" class="form-control text-right py-1" style="width: 80px; height: 32px;" value="<%= invoice.id ? (invoice.discountRate || 0) : (settings.defaultDiscRate || 0) %>" min="0" oninput="calculateInvoice()">
                     </div>
                     <div class="flex justify-between mb-2 text-gray-600 items-center"><span>Discount Amt</span><span id="ui-discount" class="text-red-500">- Rp 0</span></div>
                     
                     <div class="flex justify-between mb-2 text-gray-600 items-center">
                         <span>Tax (<%= settings.defaultTaxName || 'Tax' %> %)</span>
-                        <input type="number" name="globalTaxRate" id="globalTaxRate" class="form-control text-right py-1" style="width: 80px; height: 32px;" value="<%= settings.defaultTaxRate || 0 %>" min="0" oninput="calculateInvoice()">
+                        <input type="number" name="globalTaxRate" id="globalTaxRate" class="form-control text-right py-1" style="width: 80px; height: 32px;" value="<%= invoice.id ? (invoice.taxRate || 0) : (settings.defaultTaxRate || 0) %>" min="0" oninput="calculateInvoice()">
                     </div>
                     <div class="flex justify-between mb-2 text-gray-600 items-center"><span>Tax Amt</span><span id="ui-tax">Rp 0</span></div>
                     
@@ -93,20 +116,24 @@
             </div>
 
             <div class="mt-6 flex justify-end gap-4">
-                <a href="/invoices" class="btn btn-outline">Batal</a>
-                <button type="submit" class="btn btn-primary">Simpan Draft</button>
+                <a href="/invoices<%= invoice.id ? '/' + invoice.id : '' %>" class="btn btn-outline">Batal</a>
+                <button type="submit" class="btn btn-primary"><%= invoice.id ? 'Simpan Perubahan' : 'Simpan Draft' %></button>
             </div>
         </form>
     </div>
     
     <script src="/js/invoice.js"></script>
     <script>
-        // Safety check mencegah crash saat dibuka di mode Pratinjau Editor
         window.onload = () => {
             if (typeof addItem === 'function') {
-                addItem();
+                // Hanya tambah baris kosong jika sedang Create New (Tabel Kosong)
+                if (document.querySelectorAll('#itemsBody tr').length === 0) {
+                    addItem();
+                } else {
+                    calculateInvoice(); // Jika mode edit, langsung trigger hitungan UI
+                }
             } else {
-                console.log("Canvas Preview Mode aktif. Fungsi dinamis ditunda hingga deploy server.");
+                console.log("Fungsi js tidak ditemukan.");
             }
         };
     </script>
