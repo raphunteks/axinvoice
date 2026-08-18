@@ -1,29 +1,121 @@
+/* ==========================================================================
+   AXA XYZ - INVOICE SPECIFIC STYLES
+   Mobile-First, A4 Print Ready
+   ========================================================================== */
+
+/* Invoice View Variables & Reset */
 .invoice-box {
-    max-width: 800px;
+    max-width: 850px;
     margin: 0 auto;
-    padding: 3rem;
+    padding: 3.5rem;
     background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    position: relative; /* Untuk penempatan watermark */
 }
 
 .invoice-table {
     width: 100%;
     border-collapse: collapse;
+    margin-bottom: 2rem;
 }
 
 .invoice-table th {
-    background: #f1f5f9;
-    padding: 10px;
+    background: #f8fafc;
+    padding: 12px 15px;
     border-bottom: 2px solid #cbd5e1;
+    color: #475569;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-weight: 700;
 }
 
 .invoice-table td {
-    padding: 12px 10px;
+    padding: 15px;
     border-bottom: 1px solid #e2e8f0;
+    vertical-align: top;
 }
 
+.invoice-table tr:last-child td {
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* Styling Official Receipt Watermark */
+.paid-watermark {
+    position: absolute;
+    bottom: 50px;
+    left: 50px;
+    width: 200px;
+    opacity: 0.85;
+    transform: rotate(-15deg);
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* SUPER BIG UPGRADE - Invoice Mobile Responsiveness */
+@media (max-width: 768px) {
+    .invoice-box {
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    /* Melipat elemen header Kiri-Kanan menjadi Atas-Bawah */
+    .invoice-box .flex.justify-between {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .invoice-box .text-right {
+        text-align: left;
+    }
+
+    /* Membuat tabel invoice bisa digeser (swipe horizontal) tanpa merusak layout luar */
+    .invoice-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Melipat elemen footer Payment & Summary */
+    .flex.gap-8 { flex-direction: column; gap: 1.5rem; }
+    .invoice-box .w-1\/2 { width: 100%; }
+    
+    /* Responsive Watermark Position */
+    .paid-watermark {
+        bottom: 20px;
+        left: 20px;
+        width: 140px;
+    }
+}
+
+/* Print Styles - Untouched Perfection for A4 & PDF */
 @media print {
     body { background: #fff; }
+    .container { max-width: 100%; padding: 0; }
     .hide-print { display: none !important; }
-    .invoice-box { padding: 0; box-shadow: none; border: none; }
-    @page { margin: 12mm; size: A4; }
+    
+    .invoice-box { 
+        padding: 0; 
+        box-shadow: none; 
+        border: none; 
+        max-width: 100%;
+    }
+    
+    /* Memaksa flex layout tetap menyamping pada kertas cetak/PDF meskipun dari Mobile */
+    .invoice-box .flex { display: flex !important; flex-direction: row !important; }
+    .invoice-box .w-1\/2 { width: 50% !important; }
+    .invoice-box .text-right { text-align: right !important; }
+    
+    @page { 
+        margin: 15mm; 
+        size: A4; 
+    }
+    
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
 }
