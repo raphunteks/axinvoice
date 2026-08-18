@@ -68,14 +68,14 @@
 .receipt-summary tr.text-lg td { font-size: 14px; }
 .receipt-summary tr.font-bold.text-xl td { font-size: 16px; }
 
-/* STAMP LUNAS DIPERBARUI - Sekarang berada di aliran dokumen (bukan absolute) */
+/* STAMP LUNAS DIPERBARUI - Tegak (Vertikal), tidak dimiringkan */
 .stamp-lunas {
     display: block;
     width: 160px;
     margin-top: 3rem; /* Line Spacing 3 */
     margin-left: 1rem;
     opacity: 0.9;
-    transform: rotate(-10deg);
+    /* transform: rotate(-10deg); Dihapus agar stamp tegak lurus */
     pointer-events: none;
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
 }
