@@ -260,7 +260,6 @@ app.post('/invoices', requireAuth, async (req, res) => {
     let subtotal = 0;
     const processedItems = [];
     
-    // Safety check parsing object to array if User deletes an item row before saving
     let itemsArray = [];
     if (items) { itemsArray = Array.isArray(items) ? items : Object.values(items); }
     
@@ -294,7 +293,7 @@ app.post('/invoices', requireAuth, async (req, res) => {
   } catch(error) { res.redirect('/invoices'); }
 });
 
-// GET EDIT INVOICE (FITUR BARU)
+// FITUR BARU: GET EDIT INVOICE
 app.get('/invoices/:id/edit', requireAuth, async (req, res) => {
   try {
     const invoice = await redis.get(`axa:invoice:${req.params.id}`);
@@ -307,7 +306,7 @@ app.get('/invoices/:id/edit', requireAuth, async (req, res) => {
   } catch (error) { res.redirect('/invoices'); }
 });
 
-// POST EDIT INVOICE (FITUR BARU)
+// FITUR BARU: POST EDIT INVOICE
 app.post('/invoices/:id/edit', requireAuth, async (req, res) => {
   try {
     const existingInvoice = await redis.get(`axa:invoice:${req.params.id}`);
@@ -344,7 +343,7 @@ app.post('/invoices/:id/edit', requireAuth, async (req, res) => {
       total: grandTotal, balance: grandTotal - (existingInvoice.amountPaid || 0)
     };
     
-    // Auto status recovery (if balance changes)
+    // Auto status recovery
     if (updatedInvoice.balance <= 0 && updatedInvoice.status !== 'DRAFT') updatedInvoice.status = 'PAID';
     else if (updatedInvoice.amountPaid > 0 && updatedInvoice.balance > 0 && updatedInvoice.status !== 'DRAFT') updatedInvoice.status = 'PARTIALLY_PAID';
 
@@ -354,7 +353,7 @@ app.post('/invoices/:id/edit', requireAuth, async (req, res) => {
   } catch(error) { res.redirect(`/invoices/${req.params.id}`); }
 });
 
-// DELETE INVOICE (FITUR BARU)
+// FITUR BARU: DELETE INVOICE
 app.post('/invoices/:id/delete', requireAuth, async (req, res) => {
   try {
     await redis.del(`axa:invoice:${req.params.id}`);
