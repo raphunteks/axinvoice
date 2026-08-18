@@ -54,10 +54,11 @@
 
             <div class="card p-6">
                 <h3 class="mb-4 font-bold border-b pb-2 text-primary">Invoice Defaults</h3>
-                <div class="grid grid-cols-3 gap-4 mb-4">
+                <div class="grid grid-cols-4 gap-4 mb-4">
                     <div class="form-group"><label>Invoice Prefix</label><input type="text" name="invoicePrefix" class="form-control" placeholder="Contoh: AXZ" value="<%= settings.invoicePrefix || 'AXZ' %>"></div>
                     <div class="form-group"><label>Default Tax Name</label><input type="text" name="defaultTaxName" class="form-control" placeholder="Contoh: PPN" value="<%= settings.defaultTaxName || 'PPN' %>"></div>
                     <div class="form-group"><label>Default Tax Rate (%)</label><input type="number" name="defaultTaxRate" class="form-control" placeholder="Contoh: 11" value="<%= settings.defaultTaxRate || 0 %>"></div>
+                    <div class="form-group"><label>Default Disc Rate (%)</label><input type="number" name="defaultDiscRate" class="form-control" placeholder="Contoh: 0" value="<%= settings.defaultDiscRate || 0 %>"></div>
                 </div>
                 <div class="form-group mb-4"><label>Default Notes</label><textarea name="notes" class="form-control" rows="3" placeholder="Catatan standar yang muncul di bawah invoice..."><%= settings.notes || '' %></textarea></div>
                 <div class="form-group"><label>Terms & Conditions</label><textarea name="terms" class="form-control" rows="3" placeholder="Syarat dan ketentuan standar pembayaran..."><%= settings.terms || '' %></textarea></div>
