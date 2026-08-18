@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice <%= invoice.number %></title>
+    <!-- Favicon Global Injection -->
+    <link rel="icon" type="image/png" href="/img/axalogo.png">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/invoice.css">
 </head>
@@ -11,7 +13,13 @@
     <div class="container max-w-4xl mx-auto py-8">
         <div class="flex justify-between items-center mb-4 hide-print">
             <h2 class="font-bold text-gray-700">Client Portal</h2>
-            <button onclick="window.print()" class="btn btn-primary">Print / Save as PDF</button>
+            <div class="flex gap-2">
+                <button onclick="window.print()" class="btn btn-outline">Print Invoice PDF</button>
+                <!-- FITUR BARU: PRINT RECEIPT (HANYA JIKA LUNAS) -->
+                <% if(invoice.status === 'PAID') { %>
+                    <a href="/invoice/<%= invoice.publicId %>/receipt" target="_blank" class="btn btn-primary" style="background: var(--success); border-color: var(--success);">View Official Receipt</a>
+                <% } %>
+            </div>
         </div>
 
         <div class="invoice-box card">
@@ -71,7 +79,8 @@
                     <p class="text-sm mb-4">A/N: <%= settings.bankAccountName %></p>
                     
                     <p class="text-sm font-bold mb-2">QRIS:</p>
-                    <img src="<%= settings.qrisImage || '/img/qris.png' %>" alt="QRIS" class="w-32 border p-1 bg-white">
+                    <!-- UBAH QRIS KE JPG SEPERTI DIMINTA -->
+                    <img src="<%= settings.qrisImage || '/img/qris.jpg' %>" alt="QRIS" class="w-32 border p-1 bg-white">
                 </div>
 
                 <div class="w-1/2">
