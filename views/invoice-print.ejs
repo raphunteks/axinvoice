@@ -1,98 +1,166 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <title>Invoice_<%= invoice.number %></title>
-    <link rel="icon" type="image/png" href="/img/axalogo.png">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/invoice.css">
-</head>
-<body onload="window.print()">
-    <!-- Reusing same layout as public but completely stripped of UI containers -->
-    <div class="invoice-box" style="box-shadow: none; max-width: 100%; margin: 0; padding: 0;">
-        <!-- KOP Tetap Besar / Tidak Diubah (mb-6 untuk memadatkan jarak) -->
-        <div class="flex justify-between items-start mb-6 border-b pb-4">
-            <div>
-                <h1 class="text-4xl font-bold text-primary mb-1">INVOICE</h1>
-                <p class="text-gray-500 text-lg">#<%= invoice.number %></p>
-            </div>
-            <div class="text-right">
-                <h2 class="font-bold text-xl"><%= settings.businessName || 'AXA XYZ' %></h2>
-                <p class="text-sm text-gray-500"><%= settings.businessAddress || '' %></p>
-                <p class="text-sm text-gray-500"><%= settings.businessEmail || '' %></p>
-                <p class="text-sm text-gray-500"><%= settings.businessPhone || '' %></p>
-                <% if(settings.npwp) { %><p class="text-sm text-gray-500">NPWP: <%= settings.npwp %></p><% } %>
-            </div>
-        </div>
+/* ==========================================================================
+   AXA XYZ - OFFICIAL RECEIPT STYLES
+   Modern, Corporate, Compact Space-Saver
+   ========================================================================== */
 
-        <!-- Ukuran Font Diperkecil menjadi 12px -->
-        <div class="flex justify-between mb-6">
-            <div>
-                <h3 class="font-bold text-gray-600 border-b mb-1 pb-1 text-[12px]">BILL TO:</h3>
-                <p class="font-bold text-[12px]"><%= customer.companyName %></p>
-                <p class="text-[12px]"><%= customer.address || '' %></p>
-                <p class="text-[12px]"><%= customer.city || '' %> <%= customer.postalCode || '' %></p>
-                <p class="text-[12px]"><%= customer.email || '' %></p>
-                <% if(customer.npwp) { %><p class="text-[12px]">NPWP: <%= customer.npwp %></p><% } %>
-            </div>
-            <div class="text-right">
-                <table class="text-[12px] ml-auto">
-                    <tr><td class="font-bold pr-4 py-0.5">Status:</td><td><span class="badge badge-<%= invoice.status.toLowerCase() %> text-[10px] px-2 py-0.5"><%= invoice.status %></span></td></tr>
-                    <tr><td class="font-bold pr-4 py-0.5">Invoice Date:</td><td><%= formatDate(invoice.invoiceDate) %></td></tr>
-                    <tr><td class="font-bold pr-4 py-0.5">Due Date:</td><td><%= formatDate(invoice.dueDate) %></td></tr>
-                </table>
-            </div>
-        </div>
+.receipt-box {
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 3.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    position: relative; /* Penting untuk Stempel LUNAS */
+    overflow: hidden; /* Mencegah elemen keluar batas */
+}
 
-        <!-- Tabel Invoice -->
-        <table class="invoice-table mb-6">
-            <thead>
-                <tr>
-                    <th>Description</th>
-                    <th class="text-center">Qty</th>
-                    <th class="text-right">Price</th>
-                    <th class="text-right">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% invoice.items.forEach(item => { %>
-                <tr>
-                    <td>
-                        <b><%= item.description %></b>
-                        <!-- Font minor/period diperkecil ke 10px -->
-                        <div class="text-[10px] text-gray-500 mt-0.5"><%= item.period %></div>
-                    </td>
-                    <td class="text-center"><%= item.quantity %></td>
-                    <td class="text-right"><%= formatRupiah(item.price) %></td>
-                    <td class="text-right"><%= formatRupiah(item.total) %></td>
-                </tr>
-                <% }) %>
-            </tbody>
-        </table>
+/* Aksen Premium Garis Gradien di Atas Kuitansi */
+.receipt-box::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg, #0f172a 0%, #3b82f6 100%);
+}
 
-        <!-- Summary & Footer (Menggunakan font 12px & margin ditekan) -->
-        <div class="flex justify-between mb-6 gap-6">
-            <div class="w-1/2 p-3 bg-gray-50 rounded border">
-                <h4 class="font-bold mb-1 text-[12px]">Payment Details</h4>
-                <p class="text-[12px] font-bold">Bank Transfer:</p>
-                <p class="text-[12px]"><%= settings.bankName %> - <%= settings.bankAccount %></p>
-                <p class="text-[12px]">A/N: <%= settings.bankAccountName %></p>
-            </div>
+.receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem; /* Dikurangi */
+}
 
-            <div class="w-1/2">
-                <table class="w-full text-right text-[12px]">
-                    <tr><td class="py-1 text-gray-600">Subtotal</td><td class="py-1 font-medium"><%= formatRupiah(invoice.subtotal) %></td></tr>
-                    <% if(invoice.discountAmount && invoice.discountAmount > 0) { %>
-                    <tr><td class="py-1 text-gray-600">Discount (<%= invoice.discountRate || 0 %>%)</td><td class="py-1 font-medium text-red-500">- <%= formatRupiah(invoice.discountAmount) %></td></tr>
-                    <% } %>
-                    <tr><td class="py-1 text-gray-600"><%= settings.defaultTaxName || 'Tax' %> (<%= invoice.taxRate || 0 %>%)</td><td class="py-1 font-medium"><%= formatRupiah(invoice.tax) %></td></tr>
-                    <!-- Total diskala turun secara proporsional agar tidak terlalu memakan tempat -->
-                    <tr class="text-base font-bold border-t"><td class="py-2">Grand Total</td><td class="py-2"><%= formatRupiah(invoice.total) %></td></tr>
-                    <tr><td class="py-1 text-gray-600">Amount Paid</td><td class="py-1 text-green-600"><%= formatRupiah(invoice.amountPaid) %></td></tr>
-                    <tr class="font-bold text-lg"><td class="py-1">Balance Due</td><td class="py-1 text-red-600"><%= formatRupiah(invoice.balance) %></td></tr>
-                </table>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+.receipt-table th {
+    background: #f1f5f9;
+    padding: 8px 10px; /* Dikurangi */
+    border-bottom: 2px solid #cbd5e1;
+    color: #334155;
+    font-size: 10px; /* Diperkecil */
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.receipt-table td {
+    padding: 8px 10px; /* Dikurangi */
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: top;
+    font-size: 12px; /* Diturunkan */
+}
+
+.receipt-table td .text-xs {
+    font-size: 10px;
+}
+
+.receipt-table tr:last-child td {
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* Tabel Ringkasan Khusus Kuitansi */
+.receipt-summary td {
+    padding: 4px 10px;
+    font-size: 12px;
+}
+.receipt-summary tr.text-lg td {
+    font-size: 14px;
+}
+.receipt-summary tr.font-bold.text-xl td {
+    font-size: 16px;
+}
+
+/* Stamp LUNAS (Official AXA Paid Stamp) */
+.stamp-lunas {
+    position: absolute;
+    bottom: 60px;
+    left: 60px;
+    width: 180px;
+    opacity: 0.9;
+    transform: rotate(-10deg);
+    pointer-events: none;
+    z-index: 10;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+}
+
+/* ==========================================================================
+   SUPER BIG UPGRADE - Mobile Responsiveness Kuitansi
+   ========================================================================== */
+@media (max-width: 768px) {
+    .receipt-box {
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    /* Melipat Header */
+    .receipt-box .flex.justify-between {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .receipt-box .text-right {
+        text-align: left;
+    }
+
+    /* Tabel Kuitansi bisa di-swipe di HP */
+    .receipt-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Melipat Summary & Informasi lainnya */
+    .flex.gap-8 { flex-direction: column; gap: 1.5rem; }
+    .receipt-box .w-1\/2 { width: 100%; }
+    
+    /* Mengatur ulang skala dan posisi stempel di layar HP */
+    .stamp-lunas {
+        bottom: 20px;
+        left: 20px;
+        width: 120px;
+    }
+}
+
+/* ==========================================================================
+   Kertas A4 & PDF Print Perfection (Official Receipt)
+   ========================================================================== */
+@media print {
+    body { background: #fff; }
+    .container { max-width: 100%; padding: 0; }
+    .hide-print { display: none !important; }
+    
+    .receipt-box { 
+        padding: 0; 
+        box-shadow: none; 
+        border: none; 
+        max-width: 100%;
+    }
+    
+    /* Garis atas kuitansi harus tetap ikut di-print */
+    .receipt-box::before {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Memaksa layout tetap sejajar pada kertas PDF meskipun User menekan Print dari HP */
+    .receipt-box .flex { display: flex !important; flex-direction: row !important; }
+    .receipt-box .w-1\/2 { width: 50% !important; }
+    .receipt-box .text-right { text-align: right !important; }
+    
+    /* Penghematan Space Extra saat Print */
+    .mb-8 { margin-bottom: 1.5rem !important; }
+    .pb-6 { padding-bottom: 1rem !important; }
+    p { margin-bottom: 2px; }
+
+    @page { 
+        margin: 10mm; /* Margin kertas diperkecil menjadi 1cm */
+        size: A4; 
+    }
+    
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
