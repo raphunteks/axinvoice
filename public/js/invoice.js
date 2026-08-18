@@ -7,30 +7,28 @@ function calculateInvoice() {
     const rows = tbody.querySelectorAll('tr');
     
     let subtotal = 0;
-    let tax = 0;
 
     rows.forEach(row => {
         const qty = parseInt(row.querySelector('.qty').value) || 0;
         const price = parseInt(row.querySelector('.price').value) || 0;
-        const discountRate = parseFloat(row.querySelector('.disc').value) || 0;
-        const taxRate = parseFloat(row.querySelector('.tax').value) || 0;
 
-        const lineSubtotal = qty * price;
-        const lineDiscount = Math.round((lineSubtotal * discountRate) / 100);
-        const lineNet = lineSubtotal - lineDiscount;
-        const lineTax = Math.round((lineNet * taxRate) / 100);
-        const lineTotal = lineNet + lineTax;
-
+        const lineTotal = qty * price;
         row.querySelector('.line-total').innerText = formatRupiahJs(lineTotal);
         
-        subtotal += lineNet;
-        tax += lineTax;
+        subtotal += lineTotal;
     });
 
-    const grandTotal = subtotal + tax;
+    const globalDiscRate = parseFloat(document.getElementById('globalDiscountRate').value) || 0;
+    const globalTaxRate = parseFloat(document.getElementById('globalTaxRate').value) || 0;
+
+    const discountAmount = Math.round((subtotal * globalDiscRate) / 100);
+    const taxableBase = subtotal - discountAmount;
+    const taxAmount = Math.round((taxableBase * globalTaxRate) / 100);
+    const grandTotal = taxableBase + taxAmount;
 
     document.getElementById('ui-subtotal').innerText = formatRupiahJs(subtotal);
-    document.getElementById('ui-tax').innerText = formatRupiahJs(tax);
+    document.getElementById('ui-discount').innerText = "- " + formatRupiahJs(discountAmount);
+    document.getElementById('ui-tax').innerText = formatRupiahJs(taxAmount);
     document.getElementById('ui-total').innerText = formatRupiahJs(grandTotal);
 }
 
@@ -41,7 +39,7 @@ function addItem() {
     // Perbaikan Super Big Upgrade: 
     // 1. Tambah div flex-col agar Description & Period tersusun atas-bawah.
     // 2. Tambah white-space: normal agar tidak memaksa memanjang ke kanan.
-    // 3. Tambah vertical-align: top pada td lainnya agar sejajar sempurna.
+    // 3. Menghapus Disc & Tax (kini menjadi Global).
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <td style="min-width: 270px; white-space: normal; vertical-align: top;">
@@ -55,12 +53,6 @@ function addItem() {
         </td>
         <td style="min-width: 150px; vertical-align: top;">
             <input type="number" name="items[${index}][price]" class="form-control price text-sm text-right" placeholder="0" value="0" min="0" oninput="calculateInvoice()">
-        </td>
-        <td style="min-width: 90px; vertical-align: top;">
-            <input type="number" name="items[${index}][discount]" class="form-control disc text-sm text-center" placeholder="0" value="0" min="0" oninput="calculateInvoice()">
-        </td>
-        <td style="min-width: 90px; vertical-align: top;">
-            <input type="number" step="0.1" name="items[${index}][taxRate]" class="form-control tax text-sm text-center" placeholder="11" value="11" min="0" oninput="calculateInvoice()">
         </td>
         <td class="text-right font-medium line-total pt-3" style="min-width: 130px; vertical-align: top;">Rp 0</td>
         <td class="text-center pt-2" style="vertical-align: top;">
