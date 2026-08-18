@@ -1,0 +1,149 @@
+/* ==========================================================================
+   AXA XYZ - OFFICIAL RECEIPT STYLES
+   Modern, Corporate, with Official Brand Stamp (Traveloka Style)
+   ========================================================================== */
+
+.receipt-box {
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 3.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    position: relative; /* Penting untuk Stempel LUNAS */
+    overflow: hidden; /* Mencegah elemen keluar batas */
+}
+
+/* Aksen Premium Garis Gradien di Atas Kuitansi */
+.receipt-box::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg, #0f172a 0%, #3b82f6 100%);
+}
+
+.receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+}
+
+.receipt-table th {
+    background: #f1f5f9;
+    padding: 12px 15px;
+    border-bottom: 2px solid #cbd5e1;
+    color: #334155;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.receipt-table td {
+    padding: 15px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: top;
+}
+
+.receipt-table tr:last-child td {
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* Tabel Ringkasan Khusus Kuitansi */
+.receipt-summary td {
+    padding: 8px 15px;
+}
+
+/* Stamp LUNAS (Official AXA Paid Stamp) */
+.stamp-lunas {
+    position: absolute;
+    bottom: 60px;
+    left: 60px;
+    width: 180px;
+    opacity: 0.9;
+    transform: rotate(-10deg);
+    pointer-events: none;
+    z-index: 10;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+}
+
+/* ==========================================================================
+   SUPER BIG UPGRADE - Mobile Responsiveness Kuitansi
+   ========================================================================== */
+@media (max-width: 768px) {
+    .receipt-box {
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    /* Melipat Header */
+    .receipt-box .flex.justify-between {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .receipt-box .text-right {
+        text-align: left;
+    }
+
+    /* Tabel Kuitansi bisa di-swipe di HP */
+    .receipt-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Melipat Summary & Informasi lainnya */
+    .flex.gap-8 { flex-direction: column; gap: 1.5rem; }
+    .receipt-box .w-1\/2 { width: 100%; }
+    
+    /* Mengatur ulang skala dan posisi stempel di layar HP */
+    .stamp-lunas {
+        bottom: 20px;
+        left: 20px;
+        width: 120px;
+    }
+}
+
+/* ==========================================================================
+   Kertas A4 & PDF Print Perfection (Official Receipt)
+   ========================================================================== */
+@media print {
+    body { background: #fff; }
+    .container { max-width: 100%; padding: 0; }
+    .hide-print { display: none !important; }
+    
+    .receipt-box { 
+        padding: 0; 
+        box-shadow: none; 
+        border: none; 
+        max-width: 100%;
+    }
+    
+    /* Garis atas kuitansi harus tetap ikut di-print */
+    .receipt-box::before {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Memaksa layout tetap sejajar pada kertas PDF meskipun User menekan Print dari HP */
+    .receipt-box .flex { display: flex !important; flex-direction: row !important; }
+    .receipt-box .w-1\/2 { width: 50% !important; }
+    .receipt-box .text-right { text-align: right !important; }
+    
+    @page { 
+        margin: 15mm; 
+        size: A4; 
+    }
+    
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
