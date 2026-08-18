@@ -68,15 +68,15 @@
 .receipt-summary tr.text-lg td { font-size: 14px; }
 .receipt-summary tr.font-bold.text-xl td { font-size: 16px; }
 
+/* STAMP LUNAS DIPERBARUI - Sekarang berada di aliran dokumen (bukan absolute) */
 .stamp-lunas {
-    position: absolute;
-    bottom: 60px;
-    left: 60px;
-    width: 180px;
+    display: block;
+    width: 160px;
+    margin-top: 3rem; /* Line Spacing 3 */
+    margin-left: 1rem;
     opacity: 0.9;
     transform: rotate(-10deg);
     pointer-events: none;
-    z-index: 10;
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
 }
 
@@ -110,9 +110,8 @@
     .receipt-box .w-1\/2 { width: 100%; }
     
     .stamp-lunas {
-        bottom: 20px;
-        left: 20px;
         width: 120px;
+        margin-top: 2rem;
     }
 }
 
