@@ -1,6 +1,6 @@
 /* ==========================================================================
    AXA XYZ - OFFICIAL RECEIPT STYLES
-   Modern, Corporate, with Official Brand Stamp (Traveloka Style)
+   Modern, Corporate, Compact Space-Saver
    ========================================================================== */
 
 .receipt-box {
@@ -29,24 +29,29 @@
 .receipt-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem; /* Dikurangi */
 }
 
 .receipt-table th {
     background: #f1f5f9;
-    padding: 12px 15px;
+    padding: 8px 10px; /* Dikurangi */
     border-bottom: 2px solid #cbd5e1;
     color: #334155;
-    font-size: 0.85rem;
+    font-size: 10px; /* Diperkecil */
     text-transform: uppercase;
     font-weight: 700;
     letter-spacing: 0.05em;
 }
 
 .receipt-table td {
-    padding: 15px;
+    padding: 8px 10px; /* Dikurangi */
     border-bottom: 1px solid #e2e8f0;
     vertical-align: top;
+    font-size: 12px; /* Diturunkan */
+}
+
+.receipt-table td .text-xs {
+    font-size: 10px;
 }
 
 .receipt-table tr:last-child td {
@@ -55,7 +60,14 @@
 
 /* Tabel Ringkasan Khusus Kuitansi */
 .receipt-summary td {
-    padding: 8px 15px;
+    padding: 4px 10px;
+    font-size: 12px;
+}
+.receipt-summary tr.text-lg td {
+    font-size: 14px;
+}
+.receipt-summary tr.font-bold.text-xl td {
+    font-size: 16px;
 }
 
 /* Stamp LUNAS (Official AXA Paid Stamp) */
@@ -137,8 +149,13 @@
     .receipt-box .w-1\/2 { width: 50% !important; }
     .receipt-box .text-right { text-align: right !important; }
     
+    /* Penghematan Space Extra saat Print */
+    .mb-8 { margin-bottom: 1.5rem !important; }
+    .pb-6 { padding-bottom: 1rem !important; }
+    p { margin-bottom: 2px; }
+
     @page { 
-        margin: 15mm; 
+        margin: 10mm; /* Margin kertas diperkecil menjadi 1cm */
         size: A4; 
     }
     
