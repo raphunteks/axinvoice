@@ -10,7 +10,7 @@
 </head>
 <body onload="window.print()">
     <div class="invoice-box" style="box-shadow: none; max-width: 100%; margin: 0; padding: 0;">
-        <div class="flex justify-between items-start mb-8 border-b pb-6">
+        <div class="flex justify-between items-start">
             <div>
                 <h1 class="text-3xl font-bold text-primary mb-2">INVOICE</h1>
                 <p class="text-gray-500 text-lg">#<%= invoice.number %></p>
@@ -23,6 +23,9 @@
                 <% if(settings.npwp) { %><p class="text-sm text-gray-500">NPWP: <%= settings.npwp %></p><% } %>
             </div>
         </div>
+
+        <!-- GARIS LINES BIRU KOP DI BAWAH NPWP DENGAN LINE SPACING 1.5rem -->
+        <div class="header-divider"></div>
 
         <div class="flex justify-between mb-8">
             <div>
@@ -42,7 +45,6 @@
             </div>
         </div>
 
-        <!-- TABEL DENGAN WIDTH EXPLICIT AGAR TIDAK TERPOTONG -->
         <table class="invoice-table mb-8">
             <thead>
                 <tr>
