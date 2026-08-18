@@ -87,7 +87,10 @@
             <div class="w-1/2">
                 <table class="w-full text-right text-sm">
                     <tr><td class="py-1 text-gray-600">Subtotal</td><td class="py-1 font-medium"><%= formatRupiah(invoice.subtotal) %></td></tr>
-                    <tr><td class="py-1 text-gray-600">Tax</td><td class="py-1 font-medium"><%= formatRupiah(invoice.tax) %></td></tr>
+                    <% if(invoice.discountAmount && invoice.discountAmount > 0) { %>
+                    <tr><td class="py-1 text-gray-600">Discount (<%= invoice.discountRate || 0 %>%)</td><td class="py-1 font-medium text-red-500">- <%= formatRupiah(invoice.discountAmount) %></td></tr>
+                    <% } %>
+                    <tr><td class="py-1 text-gray-600"><%= settings.defaultTaxName || 'Tax' %> (<%= invoice.taxRate || 0 %>%)</td><td class="py-1 font-medium"><%= formatRupiah(invoice.tax) %></td></tr>
                     <tr class="text-lg font-bold border-t"><td class="py-2">Grand Total</td><td class="py-2"><%= formatRupiah(invoice.total) %></td></tr>
                     <tr class="text-lg font-bold"><td class="py-2 text-green-700">Amount Paid</td><td class="py-2 text-green-700"><%= formatRupiah(invoice.amountPaid) %></td></tr>
                     <tr class="font-bold text-xl"><td class="py-2">Balance Due</td><td class="py-2 text-gray-400">Rp 0</td></tr>
