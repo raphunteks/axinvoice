@@ -10,9 +10,10 @@
 <body onload="window.print()">
     <!-- Reusing same layout as public but completely stripped of UI containers -->
     <div class="invoice-box" style="box-shadow: none; max-width: 100%; margin: 0; padding: 0;">
-        <div class="flex justify-between items-start mb-8 border-b pb-6">
+        <!-- KOP Tetap Besar / Tidak Diubah (mb-6 untuk memadatkan jarak) -->
+        <div class="flex justify-between items-start mb-6 border-b pb-4">
             <div>
-                <h1 class="text-4xl font-bold text-primary mb-2">INVOICE</h1>
+                <h1 class="text-4xl font-bold text-primary mb-1">INVOICE</h1>
                 <p class="text-gray-500 text-lg">#<%= invoice.number %></p>
             </div>
             <div class="text-right">
@@ -24,25 +25,27 @@
             </div>
         </div>
 
-        <div class="flex justify-between mb-8">
+        <!-- Ukuran Font Diperkecil menjadi 12px -->
+        <div class="flex justify-between mb-6">
             <div>
-                <h3 class="font-bold text-gray-600 border-b mb-2 pb-1">BILL TO:</h3>
-                <p class="font-bold"><%= customer.companyName %></p>
-                <p class="text-sm"><%= customer.address || '' %></p>
-                <p class="text-sm"><%= customer.city || '' %> <%= customer.postalCode || '' %></p>
-                <p class="text-sm"><%= customer.email || '' %></p>
-                <% if(customer.npwp) { %><p class="text-sm">NPWP: <%= customer.npwp %></p><% } %>
+                <h3 class="font-bold text-gray-600 border-b mb-1 pb-1 text-[12px]">BILL TO:</h3>
+                <p class="font-bold text-[12px]"><%= customer.companyName %></p>
+                <p class="text-[12px]"><%= customer.address || '' %></p>
+                <p class="text-[12px]"><%= customer.city || '' %> <%= customer.postalCode || '' %></p>
+                <p class="text-[12px]"><%= customer.email || '' %></p>
+                <% if(customer.npwp) { %><p class="text-[12px]">NPWP: <%= customer.npwp %></p><% } %>
             </div>
             <div class="text-right">
-                <table class="text-sm ml-auto">
-                    <tr><td class="font-bold pr-4">Status:</td><td><span class="badge badge-<%= invoice.status.toLowerCase() %>"><%= invoice.status %></span></td></tr>
-                    <tr><td class="font-bold pr-4">Invoice Date:</td><td><%= formatDate(invoice.invoiceDate) %></td></tr>
-                    <tr><td class="font-bold pr-4">Due Date:</td><td><%= formatDate(invoice.dueDate) %></td></tr>
+                <table class="text-[12px] ml-auto">
+                    <tr><td class="font-bold pr-4 py-0.5">Status:</td><td><span class="badge badge-<%= invoice.status.toLowerCase() %> text-[10px] px-2 py-0.5"><%= invoice.status %></span></td></tr>
+                    <tr><td class="font-bold pr-4 py-0.5">Invoice Date:</td><td><%= formatDate(invoice.invoiceDate) %></td></tr>
+                    <tr><td class="font-bold pr-4 py-0.5">Due Date:</td><td><%= formatDate(invoice.dueDate) %></td></tr>
                 </table>
             </div>
         </div>
 
-        <table class="invoice-table mb-8">
+        <!-- Tabel Invoice -->
+        <table class="invoice-table mb-6">
             <thead>
                 <tr>
                     <th>Description</th>
@@ -54,7 +57,11 @@
             <tbody>
                 <% invoice.items.forEach(item => { %>
                 <tr>
-                    <td><b><%= item.description %></b><div class="text-xs text-gray-500"><%= item.period %></div></td>
+                    <td>
+                        <b><%= item.description %></b>
+                        <!-- Font minor/period diperkecil ke 10px -->
+                        <div class="text-[10px] text-gray-500 mt-0.5"><%= item.period %></div>
+                    </td>
                     <td class="text-center"><%= item.quantity %></td>
                     <td class="text-right"><%= formatRupiah(item.price) %></td>
                     <td class="text-right"><%= formatRupiah(item.total) %></td>
@@ -63,24 +70,26 @@
             </tbody>
         </table>
 
-        <div class="flex justify-between mb-8 gap-8">
-            <div class="w-1/2 p-4 bg-gray-50 rounded border">
-                <h4 class="font-bold mb-2">Payment Details</h4>
-                <p class="text-sm font-bold">Bank Transfer:</p>
-                <p class="text-sm"><%= settings.bankName %> - <%= settings.bankAccount %></p>
-                <p class="text-sm">A/N: <%= settings.bankAccountName %></p>
+        <!-- Summary & Footer (Menggunakan font 12px & margin ditekan) -->
+        <div class="flex justify-between mb-6 gap-6">
+            <div class="w-1/2 p-3 bg-gray-50 rounded border">
+                <h4 class="font-bold mb-1 text-[12px]">Payment Details</h4>
+                <p class="text-[12px] font-bold">Bank Transfer:</p>
+                <p class="text-[12px]"><%= settings.bankName %> - <%= settings.bankAccount %></p>
+                <p class="text-[12px]">A/N: <%= settings.bankAccountName %></p>
             </div>
 
             <div class="w-1/2">
-                <table class="w-full text-right text-sm">
+                <table class="w-full text-right text-[12px]">
                     <tr><td class="py-1 text-gray-600">Subtotal</td><td class="py-1 font-medium"><%= formatRupiah(invoice.subtotal) %></td></tr>
                     <% if(invoice.discountAmount && invoice.discountAmount > 0) { %>
                     <tr><td class="py-1 text-gray-600">Discount (<%= invoice.discountRate || 0 %>%)</td><td class="py-1 font-medium text-red-500">- <%= formatRupiah(invoice.discountAmount) %></td></tr>
                     <% } %>
                     <tr><td class="py-1 text-gray-600"><%= settings.defaultTaxName || 'Tax' %> (<%= invoice.taxRate || 0 %>%)</td><td class="py-1 font-medium"><%= formatRupiah(invoice.tax) %></td></tr>
-                    <tr class="text-lg font-bold border-t"><td class="py-2">Grand Total</td><td class="py-2"><%= formatRupiah(invoice.total) %></td></tr>
+                    <!-- Total diskala turun secara proporsional agar tidak terlalu memakan tempat -->
+                    <tr class="text-base font-bold border-t"><td class="py-2">Grand Total</td><td class="py-2"><%= formatRupiah(invoice.total) %></td></tr>
                     <tr><td class="py-1 text-gray-600">Amount Paid</td><td class="py-1 text-green-600"><%= formatRupiah(invoice.amountPaid) %></td></tr>
-                    <tr class="font-bold text-xl"><td class="py-2">Balance Due</td><td class="py-2 text-red-600"><%= formatRupiah(invoice.balance) %></td></tr>
+                    <tr class="font-bold text-lg"><td class="py-1">Balance Due</td><td class="py-1 text-red-600"><%= formatRupiah(invoice.balance) %></td></tr>
                 </table>
             </div>
         </div>
