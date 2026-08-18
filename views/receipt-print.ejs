@@ -10,8 +10,6 @@
 </head>
 <body onload="window.print()">
     <div class="receipt-box" style="box-shadow: none; max-width: 100%; margin: 0; padding: 0; position: relative;">
-        
-        <img src="/img/axapaid.png" alt="PAID STAMP" class="stamp-lunas">
 
         <div class="flex justify-between items-start">
             <div>
@@ -75,6 +73,7 @@
             <div class="w-1/2 p-4 bg-gray-50 rounded border">
                 <h4 class="font-bold mb-2 text-green-700">Payment Verified</h4>
                 <p class="text-sm">Thank you for your business. This document serves as official proof of payment.</p>
+                
                 <% if(invoice.payments && invoice.payments.length > 0) { %>
                     <div class="mt-2 pt-2 border-t text-xs text-gray-600">
                         <b>Transaction History:</b><br>
@@ -83,6 +82,9 @@
                         <% }) %>
                     </div>
                 <% } %>
+
+                <!-- STEMPEL AXAPAID DIPINDAHKAN KE SINI (DI BAWAH HISTORY) -->
+                <img src="/img/axapaid.png" alt="PAID STAMP" class="stamp-lunas">
             </div>
 
             <div class="w-1/2">
