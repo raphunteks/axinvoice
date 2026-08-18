@@ -13,7 +13,7 @@
         
         <img src="/img/axapaid.png" alt="PAID STAMP" class="stamp-lunas">
 
-        <div class="flex justify-between items-start mb-8 border-b pb-6">
+        <div class="flex justify-between items-start">
             <div>
                 <h1 class="text-3xl font-bold mb-2" style="color: var(--success);">OFFICIAL RECEIPT</h1>
                 <p class="text-gray-500 text-lg">#<%= invoice.number %></p>
@@ -27,6 +27,9 @@
             </div>
         </div>
 
+        <!-- GARIS LINES BIRU KOP DI BAWAH NPWP DENGAN LINE SPACING 1.5rem -->
+        <div class="header-divider"></div>
+
         <div class="flex justify-between mb-8">
             <div>
                 <h3 class="font-bold text-gray-600 border-b mb-2 pb-1">RECEIVED FROM:</h3>
@@ -37,7 +40,6 @@
             </div>
             <div class="text-right">
                 <table class="text-sm ml-auto">
-                    <!-- Inline CSS khusus untuk warna lunas di print -->
                     <tr><td class="font-bold pr-4">Status:</td><td><span class="badge badge-paid" style="background-color: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 999px; font-weight: bold; font-size: 10px;">PAID IN FULL</span></td></tr>
                     <tr><td class="font-bold pr-4">Invoice Date:</td><td><%= formatDate(invoice.invoiceDate) %></td></tr>
                     <tr><td class="font-bold pr-4">Receipt Date:</td><td><%= formatDate(new Date().toISOString()) %></td></tr>
@@ -45,7 +47,6 @@
             </div>
         </div>
 
-        <!-- TABEL DENGAN WIDTH EXPLICIT AGAR TIDAK TERPOTONG DI MOBILE PRINT -->
         <table class="receipt-table mb-8">
             <thead>
                 <tr>
