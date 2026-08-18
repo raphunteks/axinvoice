@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= customer.id ? 'Edit' : 'Tambah' %> Customer</title>
+    <!-- Injeksi Favicon Global -->
+    <link rel="icon" type="image/png" href="/img/axalogo.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="min-h-screen">
@@ -19,7 +21,6 @@
         </div>
     </nav>
 
-    <!-- Ditambahkan mb-12 untuk tombol save di bawah -->
     <div class="container mt-8 max-w-2xl mb-12">
         <h2><%= customer.id ? 'Edit' : 'Tambah' %> Customer</h2>
         <form action="<%= customer.id ? '/customers/'+customer.id+'/edit' : '/customers' %>" method="POST" class="card p-6 mt-4 grid gap-4">
