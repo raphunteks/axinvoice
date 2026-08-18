@@ -1,6 +1,6 @@
 /* ==========================================================================
    AXA XYZ - OFFICIAL RECEIPT STYLES
-   Modern, Corporate, Compact Space-Saver
+   Modern, Corporate, Compact Space-Saver, Wrap Fix
    ========================================================================== */
 
 .receipt-box {
@@ -11,11 +11,10 @@
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.05);
     border: 1px solid #e2e8f0;
-    position: relative; /* Penting untuk Stempel LUNAS */
-    overflow: hidden; /* Mencegah elemen keluar batas */
+    position: relative;
+    overflow: hidden;
 }
 
-/* Aksen Premium Garis Gradien di Atas Kuitansi */
 .receipt-box::before {
     content: "";
     position: absolute;
@@ -29,25 +28,27 @@
 .receipt-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 1.5rem; /* Dikurangi */
+    margin-bottom: 1.5rem;
+    table-layout: fixed; /* KUNCI: Mencegah tabel meledak keluar layar saat teks panjang */
 }
 
 .receipt-table th {
     background: #f1f5f9;
-    padding: 8px 10px; /* Dikurangi */
+    padding: 8px 10px;
     border-bottom: 2px solid #cbd5e1;
     color: #334155;
-    font-size: 10px; /* Diperkecil */
+    font-size: 10px;
     text-transform: uppercase;
     font-weight: 700;
     letter-spacing: 0.05em;
 }
 
 .receipt-table td {
-    padding: 8px 10px; /* Dikurangi */
+    padding: 8px 10px;
     border-bottom: 1px solid #e2e8f0;
     vertical-align: top;
-    font-size: 12px; /* Diturunkan */
+    font-size: 12px;
+    word-wrap: break-word; /* Mencegah string link panjang merusak baris PDF */
 }
 
 .receipt-table td .text-xs {
@@ -58,19 +59,13 @@
     border-bottom: 2px solid #e2e8f0;
 }
 
-/* Tabel Ringkasan Khusus Kuitansi */
 .receipt-summary td {
     padding: 4px 10px;
     font-size: 12px;
 }
-.receipt-summary tr.text-lg td {
-    font-size: 14px;
-}
-.receipt-summary tr.font-bold.text-xl td {
-    font-size: 16px;
-}
+.receipt-summary tr.text-lg td { font-size: 14px; }
+.receipt-summary tr.font-bold.text-xl td { font-size: 16px; }
 
-/* Stamp LUNAS (Official AXA Paid Stamp) */
 .stamp-lunas {
     position: absolute;
     bottom: 60px;
@@ -84,16 +79,15 @@
 }
 
 /* ==========================================================================
-   SUPER BIG UPGRADE - Mobile Responsiveness Kuitansi
+   Mobile Responsiveness HANYA AKTIF DI LAYAR (SCREEN)
    ========================================================================== */
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
     .receipt-box {
         padding: 1.5rem;
         border-radius: 8px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
 
-    /* Melipat Header */
     .receipt-box .flex.justify-between {
         flex-direction: column;
         gap: 1.5rem;
@@ -103,7 +97,6 @@
         text-align: left;
     }
 
-    /* Tabel Kuitansi bisa di-swipe di HP */
     .receipt-table {
         display: block;
         overflow-x: auto;
@@ -111,11 +104,9 @@
         -webkit-overflow-scrolling: touch;
     }
     
-    /* Melipat Summary & Informasi lainnya */
     .flex.gap-8 { flex-direction: column; gap: 1.5rem; }
     .receipt-box .w-1\/2 { width: 100%; }
     
-    /* Mengatur ulang skala dan posisi stempel di layar HP */
     .stamp-lunas {
         bottom: 20px;
         left: 20px;
@@ -125,6 +116,7 @@
 
 /* ==========================================================================
    Kertas A4 & PDF Print Perfection (Official Receipt)
+   MEMAKSA DESKTOP VIEW MESKIPUN PRINT DARI HP
    ========================================================================== */
 @media print {
     body { background: #fff; }
@@ -136,26 +128,40 @@
         box-shadow: none; 
         border: none; 
         max-width: 100%;
+        overflow: visible !important;
     }
     
-    /* Garis atas kuitansi harus tetap ikut di-print */
     .receipt-box::before {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
 
-    /* Memaksa layout tetap sejajar pada kertas PDF meskipun User menekan Print dari HP */
     .receipt-box .flex { display: flex !important; flex-direction: row !important; }
     .receipt-box .w-1\/2 { width: 50% !important; }
     .receipt-box .text-right { text-align: right !important; }
     
-    /* Penghematan Space Extra saat Print */
+    /* RESET TABEL AGAR TIDAK SCROLL DI KERTAS CETAK */
+    .receipt-table {
+        display: table !important;
+        width: 100% !important;
+        white-space: normal !important;
+        table-layout: fixed !important;
+    }
+    .receipt-table thead { display: table-header-group !important; }
+    .receipt-table tbody { display: table-row-group !important; }
+    .receipt-table tr { display: table-row !important; }
+    .receipt-table th, .receipt-table td {
+        display: table-cell !important;
+        white-space: normal !important;
+        word-wrap: break-word !important;
+    }
+
     .mb-8 { margin-bottom: 1.5rem !important; }
     .pb-6 { padding-bottom: 1rem !important; }
     p { margin-bottom: 2px; }
 
     @page { 
-        margin: 10mm; /* Margin kertas diperkecil menjadi 1cm */
+        margin: 10mm; 
         size: A4; 
     }
     
