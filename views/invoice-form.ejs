@@ -19,7 +19,6 @@
         </div>
     </nav>
 
-    <!-- Ditambahkan mb-12 agar ruang bawah lega, mengatasi button tertimpah layar -->
     <div class="container mt-8 mb-12">
         <h2>Buat Invoice Baru</h2>
         <form action="/invoices" method="POST" class="mt-4" id="invoiceForm">
@@ -70,7 +69,6 @@
                 <div>
                     <div class="form-group card p-4">
                         <label>Notes</label>
-                        <!-- Ditambahkan Placeholder -->
                         <textarea name="notes" class="form-control" placeholder="Catatan tambahan untuk ditampilkan pada invoice..." rows="4"><%= settings.notes || '' %></textarea>
                     </div>
                 </div>
@@ -91,12 +89,12 @@
     
     <script src="/js/invoice.js"></script>
     <script>
-        // Initialize one item row safely (mencegah error di Canvas Preview)
+        // Safety check mencegah crash saat dibuka di mode Pratinjau Editor
         window.onload = () => {
             if (typeof addItem === 'function') {
                 addItem();
             } else {
-                console.log("Canvas Preview Mode: Eksternal JS tidak dimuat. Form dinamis ini akan berfungsi penuh 100% saat dijalankan di server Node.js atau Vercel.");
+                console.log("Canvas Preview Mode aktif. Fungsi dinamis ditunda hingga deploy server.");
             }
         };
     </script>
