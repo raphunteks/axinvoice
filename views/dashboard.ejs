@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - <%= settings.businessName || 'AXA XYZ' %></title>
+    <!-- Injeksi Favicon Global -->
+    <link rel="icon" type="image/png" href="/img/axalogo.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="min-h-screen">
@@ -22,13 +24,14 @@
         </div>
     </nav>
 
-    <!-- Ditambahkan mb-12 agar ruang bawah lega dan tidak tertimpah layar -->
+    <!-- mb-12 memastikan elemen paling bawah tidak tertimpa di layar HP -->
     <div class="container mt-8 mb-12">
         <div class="flex justify-between items-center mb-6">
             <h2>Dashboard</h2>
             <a href="/invoices/new" class="btn btn-primary btn-sm">+ Buat Invoice</a>
         </div>
         
+        <!-- Peringatan Fail-Safe jika Database offline -->
         <% if(typeof error !== 'undefined' && error) { %>
             <div class="alert alert-danger mb-4"><%= error %></div>
         <% } %>
@@ -57,6 +60,7 @@
 
         <h3 class="mt-8 mb-4">Recent Invoices</h3>
         
+        <!-- overflow-x-auto agar tabel anti-penyok & bisa di-swipe di Mobile -->
         <div class="card overflow-x-auto mb-8">
             <table class="table">
                 <thead>
@@ -79,7 +83,13 @@
                             <td class="font-bold"><%= formatRupiah(inv.total) %></td>
                             <td><span class="badge badge-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
                             <td class="text-center">
-                                <a href="/invoices/<%= inv.id %>" class="btn btn-sm btn-outline">View</a>
+                                <div class="flex justify-center gap-2">
+                                    <a href="/invoices/<%= inv.id %>" class="btn btn-sm btn-outline">View</a>
+                                    <!-- Tombol Cepat Cetak Kuitansi muncul khusus jika statusnya PAID -->
+                                    <% if(inv.status === 'PAID') { %>
+                                        <a href="/invoice/<%= inv.publicId %>/receipt" target="_blank" class="btn btn-sm btn-primary">Receipt</a>
+                                    <% } %>
+                                </div>
                             </td>
                         </tr>
                         <% }) %>
