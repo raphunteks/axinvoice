@@ -24,14 +24,12 @@
         </div>
     </nav>
 
-    <!-- mb-12 memastikan elemen paling bawah tidak tertimpa di layar HP -->
     <div class="container mt-8 mb-12">
         <div class="flex justify-between items-center mb-6">
             <h2>Dashboard</h2>
             <a href="/invoices/new" class="btn btn-primary btn-sm">+ Buat Invoice</a>
         </div>
         
-        <!-- Peringatan Fail-Safe jika Database offline -->
         <% if(typeof error !== 'undefined' && error) { %>
             <div class="alert alert-danger mb-4"><%= error %></div>
         <% } %>
@@ -60,7 +58,6 @@
 
         <h3 class="mt-8 mb-4">Recent Invoices</h3>
         
-        <!-- overflow-x-auto agar tabel anti-penyok & bisa di-swipe di Mobile -->
         <div class="card overflow-x-auto mb-8">
             <table class="table">
                 <thead>
@@ -85,9 +82,8 @@
                             <td class="text-center">
                                 <div class="flex justify-center gap-2">
                                     <a href="/invoices/<%= inv.id %>" class="btn btn-sm btn-outline">View</a>
-                                    <!-- Tombol Cepat Cetak Kuitansi muncul khusus jika statusnya PAID -->
                                     <% if(inv.status === 'PAID') { %>
-                                        <a href="/invoice/<%= inv.publicId %>/receipt" target="_blank" class="btn btn-sm btn-primary">Receipt</a>
+                                        <a href="/invoices/<%= inv.id %>/receipt" target="_blank" class="btn btn-sm btn-primary">Receipt</a>
                                     <% } %>
                                 </div>
                             </td>
