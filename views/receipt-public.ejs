@@ -21,14 +21,15 @@
 
     <div class="container mb-12 flex justify-center hide-print">
         <div class="w-full max-w-4xl">
-            <div class="receipt-box bg-white p-8 md:p-12" style="box-shadow: var(--shadow-sm); border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: hidden;">
+            <!-- STRUKTUR BOX IDENTIK DENGAN RECEIPT-PRINT.EJS (TanPA flex-col) -->
+            <div class="receipt-box" style="box-shadow: 0 10px 25px rgba(0,0,0,0.05); background: #fff; padding: 3.5rem; border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: hidden;">
                 
-                <div class="flex flex-col md:flex-row justify-between items-start mb-8 gap-4">
+                <div class="flex justify-between items-start">
                     <div>
                         <h1 class="text-3xl font-bold mb-2" style="color: var(--success);">OFFICIAL RECEIPT</h1>
-                        <p class="text-gray-500 font-medium">#<%= invoice.number %></p>
+                        <p class="text-gray-500 text-lg">#<%= invoice.number %></p>
                     </div>
-                    <div class="text-left md:text-right">
+                    <div class="text-right">
                         <h2 class="font-bold text-xl"><%= settings.businessName || 'AXA XYZ' %></h2>
                         <p class="text-sm text-gray-500"><%= settings.businessAddress || '' %></p>
                         <p class="text-sm text-gray-500"><%= settings.businessEmail || '' %></p>
@@ -39,75 +40,73 @@
 
                 <div class="header-divider"></div>
 
-                <div class="flex flex-col md:flex-row justify-between mb-8 gap-4">
+                <div class="flex justify-between mb-8">
                     <div>
                         <h3 class="font-bold text-gray-600 border-b mb-2 pb-1">RECEIVED FROM:</h3>
                         <p class="font-bold"><%= customer.companyName %></p>
-                        <p class="text-sm text-gray-600"><%= customer.address || '' %></p>
-                        <p class="text-sm text-gray-600"><%= customer.city || '' %> <%= customer.postalCode || '' %></p>
-                        <p class="text-sm text-gray-600"><%= customer.email || '' %></p>
+                        <p class="text-sm"><%= customer.address || '' %></p>
+                        <p class="text-sm"><%= customer.city || '' %> <%= customer.postalCode || '' %></p>
+                        <p class="text-sm"><%= customer.email || '' %></p>
                     </div>
-                    <div class="text-left md:text-right">
-                        <table class="text-sm md:ml-auto">
-                            <tr><td class="font-bold pr-4 py-1">Status:</td><td><span class="badge badge-paid" style="background-color: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 999px; font-weight: bold; font-size: 10px;">PAID IN FULL</span></td></tr>
-                            <tr><td class="font-bold pr-4 py-1">Invoice Date:</td><td class="text-gray-600"><%= formatDate(invoice.invoiceDate) %></td></tr>
+                    <div class="text-right">
+                        <table class="text-sm ml-auto">
+                            <tr><td class="font-bold pr-4">Status:</td><td><span class="badge badge-paid" style="background-color: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 999px; font-weight: bold; font-size: 10px;">PAID IN FULL</span></td></tr>
+                            <tr><td class="font-bold pr-4">Invoice Date:</td><td><%= formatDate(invoice.invoiceDate) %></td></tr>
                             <% 
                                 let receiptDate = invoice.invoiceDate;
                                 if(invoice.payments && invoice.payments.length > 0) {
                                     receiptDate = invoice.payments[invoice.payments.length - 1].paidAt;
                                 }
                             %>
-                            <tr><td class="font-bold pr-4 py-1">Receipt Date:</td><td class="text-gray-600"><%= formatDate(receiptDate) %></td></tr>
+                            <tr><td class="font-bold pr-4">Receipt Date:</td><td><%= formatDate(receiptDate) %></td></tr>
                         </table>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto mb-8">
-                    <table class="receipt-table w-full">
-                        <thead>
-                            <tr>
-                                <th class="text-left">Description</th>
-                                <th class="text-center">Qty</th>
-                                <th class="text-right">Price</th>
-                                <th class="text-right">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% invoice.items.forEach(item => { %>
-                            <tr>
-                                <td>
-                                    <b><%= item.description %></b>
-                                    <% if(item.period) { %><div class="text-xs text-gray-500 mt-1"><%= item.period %></div><% } %>
-                                </td>
-                                <td class="text-center"><%= item.quantity %></td>
-                                <td class="text-right"><%= formatRupiah(item.price) %></td>
-                                <td class="text-right font-medium"><%= formatRupiah(item.total) %></td>
-                            </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
+                <table class="receipt-table mb-8">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%; text-align: left;">Description</th>
+                            <th class="text-center" style="width: 10%;">Qty</th>
+                            <th class="text-right" style="width: 20%;">Price</th>
+                            <th class="text-right" style="width: 20%;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% invoice.items.forEach(item => { %>
+                        <tr>
+                            <td>
+                                <b><%= item.description %></b>
+                                <% if(item.period) { %><div class="text-xs text-gray-500 mt-1"><%= item.period %></div><% } %>
+                            </td>
+                            <td class="text-center"><%= item.quantity %></td>
+                            <td class="text-right"><%= formatRupiah(item.price) %></td>
+                            <td class="text-right"><%= formatRupiah(item.total) %></td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
 
-                <div class="flex flex-col md:flex-row justify-between mb-8 gap-8">
-                    <div class="w-full md:w-1/2 p-4 bg-gray-50 rounded border">
+                <div class="flex justify-between mb-8 gap-8">
+                    <div class="w-1/2 p-4 bg-gray-50 rounded border">
                         <h4 class="font-bold mb-2 text-green-700">Payment Verified</h4>
                         <p class="text-sm">Thank you for your business. This document serves as official proof of payment.</p>
                         
                         <% if(invoice.payments && invoice.payments.length > 0) { %>
-                            <div class="mt-4 pt-3 border-t text-xs text-gray-600">
-                                <b class="text-sm">Transaction History:</b><br>
+                            <div class="mt-2 pt-2 border-t text-xs text-gray-600">
+                                <b>Transaction History:</b><br>
                                 <% invoice.payments.forEach(p => { %>
-                                    <div class="mt-1">&bull; <%= formatDate(p.paidAt) %> - <span class="font-medium"><%= formatRupiah(p.amount) %></span> (<%= p.method %>)</div>
+                                    &bull; <%= formatDate(p.paidAt) %> - <%= formatRupiah(p.amount) %> (<%= p.method %>)<br>
                                 <% }) %>
                             </div>
                         <% } %>
 
-                        <!-- STEMPEL AXAPAID TELAH DIPINDAH KE BAWAH HISTORY -->
-                        <img src="/img/axapaid.png" alt="PAID STAMP" class="stamp-lunas" style="margin-left: 0;">
+                        <!-- STEMPEL AXAPAID DI BAWAH HISTORY -->
+                        <img src="/img/axapaid.png" alt="PAID STAMP" class="stamp-lunas">
                     </div>
 
-                    <div class="w-full md:w-1/2">
-                        <table class="w-full text-right text-sm receipt-summary">
+                    <div class="w-1/2">
+                        <table class="w-full text-right receipt-summary">
                             <tr><td class="py-1 text-gray-600">Subtotal</td><td class="py-1 font-medium"><%= formatRupiah(invoice.subtotal) %></td></tr>
                             
                             <% const discValPub = invoice.discountAmount || invoice.discount || 0; %>
@@ -116,7 +115,7 @@
                             <% } %>
                             <tr><td class="py-1 text-gray-600"><%= settings.defaultTaxName || 'PPN' %> (<%= invoice.taxRate || 0 %>%)</td><td class="py-1 font-medium"><%= formatRupiah(invoice.tax || 0) %></td></tr>
                             
-                            <tr class="text-lg font-bold border-t"><td class="py-3">Grand Total</td><td class="py-3"><%= formatRupiah(invoice.total) %></td></tr>
+                            <tr class="text-lg font-bold border-t"><td class="py-2">Grand Total</td><td class="py-2"><%= formatRupiah(invoice.total) %></td></tr>
                             <tr class="text-lg font-bold"><td class="py-2 text-green-700">Amount Paid</td><td class="py-2 text-green-700"><%= formatRupiah(invoice.amountPaid) %></td></tr>
                             <tr class="font-bold text-xl"><td class="py-2">Balance Due</td><td class="py-2 text-gray-400">Rp 0</td></tr>
                         </table>
