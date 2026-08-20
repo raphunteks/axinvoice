@@ -440,7 +440,6 @@ app.get('/invoice/:publicId', async (req, res) => {
   } catch (err) { res.status(500).send('Terjadi kesalahan muat public invoice.'); }
 });
 
-// FITUR BARU: ROUTE PRINT PUBLIC INVOICE
 app.get('/invoice/:publicId/print', async (req, res) => {
   try {
     const ids = await redis.lrange('axa:invoices', 0, -1);
@@ -453,7 +452,6 @@ app.get('/invoice/:publicId/print', async (req, res) => {
   } catch (err) { res.status(500).send('Terjadi kesalahan muat public invoice print.'); }
 });
 
-// FITUR DIPERBARUI: MERENDER RECEIPT-PUBLIC BUKAN RECEIPT-PRINT
 app.get('/invoice/:publicId/receipt', async (req, res) => {
   try {
     const ids = await redis.lrange('axa:invoices', 0, -1);
@@ -467,7 +465,41 @@ app.get('/invoice/:publicId/receipt', async (req, res) => {
 });
 
 // ==========================================
-// 9. SETTINGS & ERROR
+// 9. RECEIPTS (ADMIN)
+// ==========================================
+app.get('/receipts', requireAuth, async (req, res) => {
+  try {
+    const ids = await redis.lrange('axa:invoices', 0, -1);
+    let invoices = ids.length ? await Promise.all(ids.map(id => redis.get(`axa:invoice:${id}`))) : [];
+    
+    for(let inv of invoices) {
+      if(inv) {
+          const cus = await redis.get(`axa:customer:${inv.customerId}`);
+          inv.customerName = cus ? cus.companyName : 'Unknown';
+      }
+    }
+    
+    res.render('receipt', { receipts: invoices.filter(i=>i).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)) });
+  } catch (error) { 
+    res.render('receipt', { receipts: [], error: 'Gagal memuat data kuitansi.' }); 
+  }
+});
+
+app.get('/invoices/:id/receipt/detail', requireAuth, async (req, res) => {
+  try {
+    const invoice = await redis.get(`axa:invoice:${req.params.id}`);
+    if (!invoice || (invoice.status !== 'PAID' && invoice.amountPaid <= 0)) {
+        return res.redirect('/receipts');
+    }
+    const customer = await redis.get(`axa:customer:${invoice.customerId}`);
+    res.render('receipt-detail', { invoice, customer });
+  } catch (err) { 
+    res.redirect('/receipts'); 
+  }
+});
+
+// ==========================================
+// 10. SETTINGS & ERROR
 // ==========================================
 app.get('/settings', requireAuth, (req, res) => res.render('settings'));
 app.post('/settings', requireAuth, async (req, res) => {
