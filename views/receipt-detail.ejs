@@ -54,7 +54,6 @@
                         <table class="text-sm md:ml-auto">
                             <tr><td class="font-bold pr-4 py-1">Status:</td><td><span class="badge badge-paid" style="background-color: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 999px; font-weight: bold; font-size: 10px;">PAID IN FULL</span></td></tr>
                             <tr><td class="font-bold pr-4 py-1">Invoice Date:</td><td class="text-gray-600"><%= formatDate(invoice.invoiceDate) %></td></tr>
-                            <!-- Mengambil tanggal pembayaran terakhir sebagai Receipt Date -->
                             <% 
                                 let receiptDate = invoice.invoiceDate;
                                 if(invoice.payments && invoice.payments.length > 0) {
@@ -138,6 +137,7 @@
                 
                 <a href="/invoices/<%= invoice.id %>/receipt" target="_blank" class="btn w-full mb-3 block text-center" style="background: var(--success); color: white; border-color: var(--success);">Print / Save PDF Kuitansi</a>
                 
+                <!-- SCRIPT COPY URL MENGGUNAKAN /receipt/:publicId -->
                 <button id="copyBtn" onclick="copyLink()" class="btn btn-outline w-full mb-2 bg-gray-50 text-primary border-primary">Copy Public Link</button>
             </div>
             
@@ -149,8 +149,8 @@
 
     <script>
         function copyLink() {
-            // Membagikan link public receipt (bukan admin link)
-            const url = window.location.origin + '/invoice/<%= invoice.publicId %>/receipt';
+            // URL MENGGUNAKAN POLA BARU
+            const url = window.location.origin + '/receipt/<%= invoice.publicId %>';
             window.navigator.clipboard.writeText(url).then(() => {
                 const btn = document.getElementById('copyBtn');
                 const originalText = btn.innerText;
