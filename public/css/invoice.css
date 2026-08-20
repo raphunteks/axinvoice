@@ -14,7 +14,6 @@
     position: relative;
 }
 
-/* Garis Pembatas KOP Header Elegan */
 .header-divider {
     width: 100%;
     height: 4px;
@@ -77,9 +76,6 @@
     z-index: 10;
 }
 
-/* ==========================================================================
-   Mobile Responsiveness HANYA AKTIF DI LAYAR (SCREEN)
-   ========================================================================== */
 @media screen and (max-width: 768px) {
     .invoice-box {
         padding: 1.5rem;
@@ -113,9 +109,6 @@
     }
 }
 
-/* ==========================================================================
-   Print Styles - MEMAKSA DESKTOP VIEW MESKIPUN PRINT DARI HP
-   ========================================================================== */
 @media print {
     body { background: #fff; }
     .container { max-width: 100%; padding: 0; }
