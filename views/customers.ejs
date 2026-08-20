@@ -8,57 +8,66 @@
     <link rel="icon" type="image/png" href="/img/axalogo.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="min-h-screen">
-    <nav class="navbar">
+<body class="min-h-screen bg-gray-50">
+    <nav class="navbar hide-print">
         <div class="container nav-content">
             <div class="brand"><%= settings.businessName || 'AXA XYZ' %></div>
             <div class="nav-links">
                 <a href="/dashboard">Dashboard</a>
-                <a href="/customers">Customers</a>
+                <a href="/customers" class="font-bold text-primary">Customers</a>
                 <a href="/invoices">Invoices</a>
+                <a href="/receipts">Receipts</a>
                 <a href="/settings">Settings</a>
                 <form action="/logout" method="POST" style="display:inline;">
-                    <button type="submit" class="btn btn-sm btn-outline">Logout</button>
+                    <button type="submit" class="btn btn-sm btn-outline" style="border-color: var(--danger); color: var(--danger);">Logout</button>
                 </form>
             </div>
         </div>
     </nav>
 
     <div class="container mt-8 mb-12">
-        <div class="flex justify-between items-center mb-6">
-            <h2>Customers</h2>
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <h2>Customers Management</h2>
             <a href="/customers/new" class="btn btn-primary">+ Tambah Customer</a>
         </div>
 
         <% if(typeof success !== 'undefined' && success) { %>
             <div class="alert alert-success mb-4"><%= success %></div>
         <% } %>
+        <% if(typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger mb-4"><%= error %></div>
+        <% } %>
 
-        <div class="card overflow-x-auto mb-8">
-            <table class="table">
+        <div class="card overflow-x-auto mb-8 bg-white">
+            <table class="table w-full">
                 <thead>
                     <tr>
                         <th>Company Name</th>
                         <th>Contact Person</th>
                         <th>Email</th>
                         <th>Phone</th>
-                        <th>Actions</th>
+                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% customers.forEach(c => { %>
-                    <tr>
-                        <td class="font-medium"><%= c.companyName %></td>
-                        <td><%= c.contactPerson %></td>
-                        <td><%= c.email %></td>
-                        <td><%= c.phone %></td>
-                        <td>
-                            <a href="/customers/<%= c.id %>/edit" class="btn btn-sm btn-outline">Edit</a>
-                        </td>
-                    </tr>
-                    <% }) %>
-                    <% if(customers.length === 0) { %>
-                        <tr><td colspan="5" class="text-center py-6 text-gray-500">Belum ada customer.</td></tr>
+                    <% if(customers && customers.length > 0) { %>
+                        <% customers.forEach(c => { %>
+                        <tr>
+                            <td class="font-medium"><%= c.companyName %></td>
+                            <td><%= c.contactPerson || '-' %></td>
+                            <td><%= c.email || '-' %></td>
+                            <td><%= c.phone || '-' %></td>
+                            <td class="text-center">
+                                <div class="flex justify-center gap-2">
+                                    <a href="/customers/<%= c.id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } %>
+                    
+                    <% if(!customers || customers.length === 0) { %>
+                        <tr><td colspan="5" class="text-center py-8 text-gray-500">Belum ada customer yang terdaftar.</td></tr>
                     <% } %>
                 </tbody>
             </table>
