@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/css/receipt.css">
 </head>
 <body class="min-h-screen bg-gray-50">
-    <!-- Navbar Minimalis untuk Publik -->
+    <!-- Navbar Minimalis untuk Publik (Ini yang disembunyikan saat print) -->
     <div class="bg-white border-b py-3 px-6 mb-8 hide-print shadow-sm">
         <div class="container flex justify-between items-center">
             <div class="font-bold text-primary flex items-center gap-2">
@@ -19,10 +19,12 @@
         </div>
     </div>
 
-    <div class="container mb-12 flex justify-center hide-print">
+    <!-- HAPUS CLASS 'hide-print' DARI CONTAINER INI AGAR TIDAK BLANK SAAT DICETAK -->
+    <div class="container mb-12 flex justify-center">
         <div class="w-full max-w-4xl">
-            <!-- STRUKTUR BOX IDENTIK DENGAN RECEIPT-PRINT.EJS (TanPA flex-col) -->
-            <div class="receipt-box" style="box-shadow: 0 10px 25px rgba(0,0,0,0.05); background: #fff; padding: 3.5rem; border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: hidden;">
+            
+            <!-- HAPUS INLINE STYLE AGAR @MEDIA PRINT DI RECEIPT.CSS MENGAMBIL ALIH SEPENUHNYA -->
+            <div class="receipt-box">
                 
                 <div class="flex justify-between items-start">
                     <div>
@@ -101,7 +103,6 @@
                             </div>
                         <% } %>
 
-                        <!-- STEMPEL AXAPAID DI BAWAH HISTORY -->
                         <img src="/img/axapaid.png" alt="PAID STAMP" class="stamp-lunas">
                     </div>
 
