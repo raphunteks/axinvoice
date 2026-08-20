@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt <%= invoice.number %></title>
+    <link rel="icon" type="image/png" href="/img/axalogo.png">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/receipt.css">
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Navbar Admin -->
+    <nav class="navbar hide-print">
+        <div class="container nav-content">
+            <div class="brand"><%= settings.businessName || 'AXA XYZ' %></div>
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/receipts">Back to Receipts</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-8 mb-12 flex flex-col md:flex-row gap-6 hide-print">
+        
+        <!-- Panel Kiri: Tampilan Pratinjau Kuitansi -->
+        <div class="w-full md:w-3/4">
+            <div class="receipt-box card bg-white" style="box-shadow: var(--shadow-sm); padding: 2.5rem;">
+                
+                <div class="flex flex-col md:flex-row justify-between items-start mb-8 gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold mb-2" style="color: var(--success);">OFFICIAL RECEIPT</h1>
+                        <p class="text-gray-500 font-medium">#<%= invoice.number %></p>
+                    </div>
+                    <div class="text-left md:text-right">
+                        <h2 class="font-bold text-xl"><%= settings.businessName || 'AXA XYZ' %></h2>
+                        <p class="text-sm text-gray-500"><%= settings.businessAddress || '' %></p>
+                        <p class="text-sm text-gray-500"><%= settings.businessEmail || '' %></p>
+                        <p class="text-sm text-gray-500"><%= settings.businessPhone || '' %></p>
+                        <% if(settings.npwp) { %><p class="text-sm text-gray-500">NPWP: <%= settings.npwp %></p><% } %>
+                    </div>
+                </div>
+
+                <div class="header-divider"></div>
+
+                <div class="flex flex-col md:flex-row justify-between mb-8 gap-4">
+                    <div>
+                        <h3 class="font-bold text-gray-600 border-b mb-2 pb-1">RECEIVED FROM:</h3>
+                        <p class="font-bold"><%= customer.companyName %></p>
+                        <p class="text-sm text-gray-600"><%= customer.address || '' %></p>
+                        <p class="text-sm text-gray-600"><%= customer.city || '' %> <%= customer.postalCode || '' %></p>
+                        <p class="text-sm text-gray-600"><%= customer.email || '' %></p>
+                    </div>
+                    <div class="text-left md:text-right">
+                        <table class="text-sm md:ml-auto">
+                            <tr><td class="font-bold pr-4 py-1">Status:</td><td><span class="badge badge-paid" style="background-color: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 999px; font-weight: bold; font-size: 10px;">PAID IN FULL</span></td></tr>
+                            <tr><td class="font-bold pr-4 py-1">Invoice Date:</td><td class="text-gray-600"><%= formatDate(invoice.invoiceDate) %></td></tr>
+                            <!-- Mengambil tanggal pembayaran terakhir sebagai Receipt Date -->
+                            <% 
+                                let receiptDate = invoice.invoiceDate;
+                                if(invoice.payments && invoice.payments.length > 0) {
+                                    receiptDate = invoice.payments[invoice.payments.length - 1].paidAt;
+                                }
+                            %>
+                            <tr><td class="font-bold pr-4 py-1">Receipt Date:</td><td class="text-gray-600"><%= formatDate(receiptDate) %></td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto mb-8">
+                    <table class="receipt-table w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-left">Description</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-right">Price</th>
+                                <th class="text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% invoice.items.forEach(item => { %>
+                            <tr>
+                                <td>
+                                    <b><%= item.description %></b>
+                                    <% if(item.period) { %><div class="text-xs text-gray-500 mt-1"><%= item.period %></div><% } %>
+                                </td>
+                                <td class="text-center"><%= item.quantity %></td>
+                                <td class="text-right"><%= formatRupiah(item.price) %></td>
+                                <td class="text-right font-medium"><%= formatRupiah(item.total) %></td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex flex-col md:flex-row justify-between mb-8 gap-8">
+                    <div class="w-full md:w-1/2 p-4 bg-gray-50 rounded border">
+                        <h4 class="font-bold mb-2 text-green-700">Payment Verified</h4>
+                        <p class="text-sm">Thank you for your business. This document serves as official proof of payment.</p>
+                        
+                        <% if(invoice.payments && invoice.payments.length > 0) { %>
+                            <div class="mt-4 pt-3 border-t text-xs text-gray-600">
+                                <b class="text-sm">Transaction History:</b><br>
+                                <% invoice.payments.forEach(p => { %>
+                                    <div class="mt-1">&bull; <%= formatDate(p.paidAt) %> - <span class="font-medium"><%= formatRupiah(p.amount) %></span> (<%= p.method %>)</div>
+                                <% }) %>
+                            </div>
+                        <% } %>
+
+                        <!-- STEMPEL AXAPAID -->
+                        <img src="/img/axapaid.png" alt="PAID STAMP" class="stamp-lunas" style="margin-left: 0;">
+                    </div>
+
+                    <div class="w-full md:w-1/2">
+                        <table class="w-full text-right text-sm receipt-summary">
+                            <tr><td class="py-1 text-gray-600">Subtotal</td><td class="py-1 font-medium"><%= formatRupiah(invoice.subtotal) %></td></tr>
+                            
+                            <% const discVal = invoice.discountAmount || invoice.discount || 0; %>
+                            <% if(discVal > 0) { %>
+                                <tr><td class="py-1 text-gray-600">Discount (<%= invoice.discountRate || 0 %>%)</td><td class="py-1 font-medium text-red-500">- <%= formatRupiah(discVal) %></td></tr>
+                            <% } %>
+                            <tr><td class="py-1 text-gray-600"><%= settings.defaultTaxName || 'PPN' %> (<%= invoice.taxRate || 0 %>%)</td><td class="py-1 font-medium"><%= formatRupiah(invoice.tax || 0) %></td></tr>
+                            
+                            <tr class="text-lg font-bold border-t"><td class="py-3">Grand Total</td><td class="py-3"><%= formatRupiah(invoice.total) %></td></tr>
+                            <tr class="text-lg font-bold"><td class="py-2 text-green-700">Amount Paid</td><td class="py-2 text-green-700"><%= formatRupiah(invoice.amountPaid) %></td></tr>
+                            <tr class="font-bold text-xl"><td class="py-2">Balance Due</td><td class="py-2 text-gray-400">Rp 0</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Kanan: Actions Box -->
+        <div class="w-full md:w-1/4">
+            <div class="card p-4 mb-4 bg-white">
+                <h3 class="font-bold mb-4 border-b pb-2">Receipt Actions</h3>
+                
+                <a href="/invoices/<%= invoice.id %>" class="btn w-full mb-3 block text-center bg-gray-100 text-gray-700 border-gray-300">Lihat Detail Invoice Asli</a>
+                
+                <a href="/invoices/<%= invoice.id %>/receipt" target="_blank" class="btn w-full mb-3 block text-center" style="background: var(--success); color: white; border-color: var(--success);">Print / Save PDF Kuitansi</a>
+                
+                <button id="copyBtn" onclick="copyLink()" class="btn btn-outline w-full mb-2 bg-gray-50 text-primary border-primary">Copy Public Link</button>
+            </div>
+            
+            <div class="card p-4 bg-white text-sm text-gray-500 text-center">
+                <p>Kuitansi ini dihasilkan secara otomatis dan sah sebagai bukti pembayaran yang valid.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyLink() {
+            // Membagikan link public receipt (bukan admin link)
+            const url = window.location.origin + '/invoice/<%= invoice.publicId %>/receipt';
+            window.navigator.clipboard.writeText(url).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied!';
+                btn.classList.add('bg-green-100', 'text-green-800');
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove('bg-green-100', 'text-green-800');
+                }, 2000);
+            }).catch(err => { console.error('Copy failed', err); });
+        }
+    </script>
+</body>
+</html>
