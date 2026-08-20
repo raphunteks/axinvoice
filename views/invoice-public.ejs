@@ -3,103 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice <%= invoice.number %></title>
-    <!-- Favicon Global Injection -->
+    <title>Invoice <%= invoice.number %> - <%= settings.businessName || 'AXA XYZ' %></title>
     <link rel="icon" type="image/png" href="/img/axalogo.png">
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/invoice.css">
 </head>
-<body class="bg-gray-100">
-    <div class="container max-w-4xl mx-auto py-8">
-        <div class="flex justify-between items-center mb-4 hide-print">
-            <h2 class="font-bold text-gray-700">Client Portal</h2>
+<body class="min-h-screen bg-gray-50">
+    <!-- Navbar Minimalis untuk Publik -->
+    <div class="bg-white border-b py-3 px-6 mb-8 hide-print shadow-sm">
+        <div class="container flex justify-between items-center">
+            <div class="font-bold text-primary flex items-center gap-2">
+                <span><%= settings.businessName || 'AXA XYZ' %></span>
+            </div>
             <div class="flex gap-2">
-                <button onclick="window.print()" class="btn btn-outline">Print Invoice PDF</button>
-                <!-- FITUR BARU: PRINT RECEIPT (HANYA JIKA LUNAS) -->
+                <a href="/invoice/<%= invoice.publicId %>/print" target="_blank" class="btn btn-outline btn-sm">🖨️ Print / Save PDF</a>
                 <% if(invoice.status === 'PAID') { %>
-                    <a href="/invoice/<%= invoice.publicId %>/receipt" target="_blank" class="btn btn-primary" style="background: var(--success); border-color: var(--success);">View Official Receipt</a>
+                    <a href="/invoice/<%= invoice.publicId %>/receipt" target="_blank" class="btn btn-sm" style="background: var(--success); color: white; border-color: var(--success);">Lihat Kuitansi</a>
                 <% } %>
             </div>
         </div>
+    </div>
 
-        <div class="invoice-box card">
-            <div class="flex justify-between items-start mb-8 border-b pb-6">
-                <div>
-                    <h1 class="text-3xl font-bold text-primary mb-2">INVOICE</h1>
-                    <p class="text-gray-500">#<%= invoice.number %></p>
+    <div class="container mb-12 flex justify-center hide-print">
+        <div class="w-full max-w-4xl">
+            <div class="card p-8 bg-white">
+                <div class="flex justify-between items-start mb-8 border-b pb-6">
+                    <div>
+                        <h1 class="text-3xl font-bold text-primary mb-2">INVOICE</h1>
+                        <p class="text-gray-500 font-medium">#<%= invoice.number %></p>
+                    </div>
+                    <div class="text-right">
+                        <h2 class="font-bold text-xl"><%= settings.businessName || 'AXA XYZ' %></h2>
+                        <p class="text-sm text-gray-500"><%= settings.businessAddress || '' %></p>
+                        <p class="text-sm text-gray-500"><%= settings.businessEmail || '' %></p>
+                        <p class="text-sm text-gray-500"><%= settings.businessPhone || '' %></p>
+                        <% if(settings.npwp) { %><p class="text-sm text-gray-500">NPWP: <%= settings.npwp %></p><% } %>
+                    </div>
                 </div>
-                <div class="text-right">
-                    <h2 class="font-bold text-xl"><%= settings.businessName || 'AXA XYZ' %></h2>
-                    <p class="text-sm text-gray-500"><%= settings.businessAddress || '' %></p>
-                    <p class="text-sm text-gray-500"><%= settings.businessEmail || '' %></p>
-                </div>
-            </div>
 
-            <div class="flex justify-between mb-8">
-                <div>
-                    <h3 class="font-bold text-gray-600 border-b mb-2 pb-1">BILL TO:</h3>
-                    <p class="font-bold"><%= customer.companyName %></p>
-                    <p class="text-sm"><%= customer.address || '' %></p>
+                <div class="flex justify-between mb-8">
+                    <div>
+                        <h3 class="font-bold text-gray-600 border-b mb-2 pb-1">BILL TO:</h3>
+                        <p class="font-bold"><%= customer.companyName %></p>
+                        <p class="text-sm text-gray-600"><%= customer.address || '' %></p>
+                        <p class="text-sm text-gray-600"><%= customer.city || '' %> <%= customer.postalCode || '' %></p>
+                        <p class="text-sm text-gray-600"><%= customer.email || '' %></p>
+                    </div>
+                    <div class="text-right">
+                        <table class="text-sm ml-auto">
+                            <tr><td class="font-bold pr-4 py-1">Status:</td><td><span class="badge badge-<%= invoice.status.toLowerCase() %>"><%= invoice.status %></span></td></tr>
+                            <tr><td class="font-bold pr-4 py-1">Invoice Date:</td><td class="text-gray-600"><%= formatDate(invoice.invoiceDate) %></td></tr>
+                            <tr><td class="font-bold pr-4 py-1">Due Date:</td><td class="text-gray-600"><%= formatDate(invoice.dueDate) %></td></tr>
+                        </table>
+                    </div>
                 </div>
-                <div class="text-right">
-                    <table class="text-sm ml-auto">
-                        <tr><td class="font-bold pr-4">Status:</td><td><span class="badge badge-<%= invoice.status.toLowerCase() %>"><%= invoice.status %></span></td></tr>
-                        <tr><td class="font-bold pr-4">Invoice Date:</td><td><%= formatDate(invoice.invoiceDate) %></td></tr>
-                        <tr><td class="font-bold pr-4">Due Date:</td><td><%= formatDate(invoice.dueDate) %></td></tr>
+
+                <div class="overflow-x-auto mb-8">
+                    <table class="table w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-left">DESCRIPTION</th>
+                                <th class="text-center">QTY</th>
+                                <th class="text-right">PRICE</th>
+                                <th class="text-right">TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% invoice.items.forEach(item => { %>
+                            <tr>
+                                <td>
+                                    <b class="text-sm"><%= item.description %></b>
+                                    <% if(item.period) { %><div class="text-xs text-gray-500 mt-1"><%= item.period %></div><% } %>
+                                </td>
+                                <td class="text-center text-sm"><%= item.quantity %></td>
+                                <td class="text-right text-sm"><%= formatRupiah(item.price) %></td>
+                                <td class="text-right text-sm font-medium"><%= formatRupiah(item.total) %></td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
                     </table>
                 </div>
-            </div>
 
-            <table class="invoice-table mb-8">
-                <thead>
-                    <tr>
-                        <th>Description</th>
-                        <th class="text-center">Qty</th>
-                        <th class="text-right">Price</th>
-                        <th class="text-right">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% invoice.items.forEach(item => { %>
-                    <tr>
-                        <td><b><%= item.description %></b><div class="text-xs text-gray-500"><%= item.period %></div></td>
-                        <td class="text-center"><%= item.quantity %></td>
-                        <td class="text-right"><%= formatRupiah(item.price) %></td>
-                        <td class="text-right"><%= formatRupiah(item.total) %></td>
-                    </tr>
-                    <% }) %>
-                </tbody>
-            </table>
-
-            <div class="flex justify-between mb-8 gap-8">
-                <div class="w-1/2 p-4 bg-gray-50 rounded border">
-                    <h4 class="font-bold mb-2">Payment Info</h4>
-                    <p class="text-sm font-bold">Bank Transfer:</p>
-                    <p class="text-sm"><%= settings.bankName %> - <%= settings.bankAccount %></p>
-                    <p class="text-sm mb-4">A/N: <%= settings.bankAccountName %></p>
+                <div class="flex flex-col md:flex-row justify-between mb-8 gap-8">
+                    <div class="w-full md:w-1/2">
+                        <h4 class="font-bold text-sm text-gray-600 mb-2">Payment Details</h4>
+                        <div class="bg-gray-50 p-4 rounded border border-gray-100 mb-4">
+                            <p class="text-sm font-bold">Bank Transfer:</p>
+                            <p class="text-sm"><%= settings.bankName %> - <%= settings.bankAccount %></p>
+                            <p class="text-sm">A/N: <%= settings.bankAccountName %></p>
+                        </div>
+                        <% if(invoice.notes) { %>
+                            <h4 class="font-bold text-sm text-gray-600 mb-2">Notes:</h4>
+                            <p class="text-sm whitespace-pre-wrap text-gray-700"><%= invoice.notes %></p>
+                        <% } %>
+                    </div>
                     
-                    <p class="text-sm font-bold mb-2">QRIS:</p>
-                    <!-- UBAH QRIS KE JPG SEPERTI DIMINTA -->
-                    <img src="<%= settings.qrisImage || '/img/qris.jpg' %>" alt="QRIS" class="w-32 border p-1 bg-white">
-                </div>
-
-                <div class="w-1/2">
-                    <table class="w-full text-right text-sm">
-                        <tr><td class="py-1 text-gray-600">Subtotal</td><td class="py-1 font-medium"><%= formatRupiah(invoice.subtotal) %></td></tr>
-                        <tr><td class="py-1 text-gray-600">Tax</td><td class="py-1 font-medium"><%= formatRupiah(invoice.tax) %></td></tr>
-                        <tr class="text-lg font-bold border-t"><td class="py-2">Grand Total</td><td class="py-2"><%= formatRupiah(invoice.total) %></td></tr>
-                        <tr><td class="py-1 text-gray-600">Amount Paid</td><td class="py-1 text-green-600"><%= formatRupiah(invoice.amountPaid) %></td></tr>
-                        <tr class="font-bold text-xl"><td class="py-2">Balance Due</td><td class="py-2 text-red-600"><%= formatRupiah(invoice.balance) %></td></tr>
-                    </table>
+                    <div class="w-full md:w-1/2">
+                        <table class="w-full text-right text-sm">
+                            <tr><td class="py-1 text-gray-600">Subtotal</td><td class="py-1 font-medium"><%= formatRupiah(invoice.subtotal) %></td></tr>
+                            <% const discValPub = invoice.discount || 0; %>
+                            <% if(discValPub > 0) { %>
+                                <tr><td class="py-1 text-gray-600">Discount <% if(invoice.discountRate) { %>(<%= invoice.discountRate %>%)<% } %></td><td class="py-1 text-red-500 font-medium">- <%= formatRupiah(discValPub) %></td></tr>
+                            <% } %>
+                            <tr><td class="py-1 text-gray-600">PPN <% if(invoice.taxRate) { %>(<%= invoice.taxRate %>%)<% } %></td><td class="py-1 font-medium"><%= formatRupiah(invoice.tax) %></td></tr>
+                            <tr class="text-lg font-bold border-t"><td class="py-3">Grand Total</td><td class="py-3 text-primary"><%= formatRupiah(invoice.total) %></td></tr>
+                            <tr><td class="py-1 text-gray-600">Amount Paid</td><td class="py-1 text-green-600 font-medium"><%= formatRupiah(invoice.amountPaid) %></td></tr>
+                            <tr class="font-bold text-xl"><td class="py-2">Balance Due</td><td class="py-2 text-red-600"><%= formatRupiah(invoice.balance) %></td></tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-
-            <% if(settings.terms) { %>
-            <div class="mt-8 text-xs text-gray-500 border-t pt-4">
-                <b>Terms & Conditions:</b><br>
-                <span class="whitespace-pre-wrap"><%= settings.terms %></span>
-            </div>
-            <% } %>
         </div>
     </div>
 </body>
