@@ -353,20 +353,22 @@ app.post('/invoices/:id/edit', requireAuth, async (req, res) => {
   } catch(error) { res.redirect(`/invoices/${req.params.id}`); }
 });
 
-// DELETE INVOICE (DENGAN SMART REDIRECT)
+// DELETE INVOICE (SMART REDIRECT DIPERBARUI UNTUK RECEIPTS)
 app.post('/invoices/:id/delete', requireAuth, async (req, res) => {
   try {
     await redis.del(`axa:invoice:${req.params.id}`);
     await redis.lrem('axa:invoices', 0, req.params.id);
-    req.session.success = 'Invoice berhasil dihapus secara permanen.';
+    req.session.success = 'Data berhasil dihapus secara permanen.';
   } catch(err) {
-    req.session.error = 'Gagal menghapus invoice.';
+    req.session.error = 'Gagal menghapus data.';
   }
   
-  // Smart Redirect: Cek dari mana request delete ini berasal (Dashboard vs Halaman Lain)
+  // Smart Redirect: Cek dari mana request delete ini berasal (Dashboard vs Receipts vs Invoices)
   const referer = req.get('Referrer');
   if (referer && referer.includes('/dashboard')) {
     res.redirect('/dashboard');
+  } else if (referer && referer.includes('/receipts')) {
+    res.redirect('/receipts');
   } else {
     res.redirect('/invoices');
   }
