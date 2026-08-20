@@ -133,6 +133,32 @@ h1, h2, h3, h4 { color: var(--primary); font-weight: 700; line-height: 1.2; }
     transform: translateY(-1px); 
     box-shadow: var(--shadow-sm); 
 }
+/* TOMBOL SUCCESS (HIJAU) */
+.btn-success {
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
+}
+.btn-success:hover {
+    background: #059669; /* Darker green */
+    border-color: #059669;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+/* TOMBOL DANGER (MERAH) */
+.btn-danger {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+}
+.btn-danger:hover {
+    background: #dc2626; /* Darker red */
+    border-color: #dc2626;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
 .btn-sm { 
     padding: 0.35rem 0.75rem; 
     font-size: 0.8rem; 
