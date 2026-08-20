@@ -20,7 +20,6 @@
         </div>
     </nav>
 
-    <!-- SUPER BIG UPGRADE: Responsive Flex-col untuk Layar Mobile -->
     <div class="container mt-8 mb-12 flex flex-col md:flex-row gap-6 hide-print">
         
         <!-- Panel Kiri: Konten Invoice -->
@@ -100,7 +99,6 @@
                         <table class="w-full text-right text-sm">
                             <tr><td class="py-1 text-gray-600">Subtotal</td><td class="py-1 font-medium"><%= formatRupiah(invoice.subtotal) %></td></tr>
                             
-                            <!-- MENAMPILKAN DISC & PPN DINAMIS SESUAI PERMINTAAN -->
                             <% const discVal = invoice.discountAmount || invoice.discount || 0; %>
                             <% if(discVal > 0) { %>
                                 <tr><td class="py-1 text-gray-600">Discount (<%= invoice.discountRate || 0 %>%)</td><td class="py-1 font-medium text-red-500">- <%= formatRupiah(discVal) %></td></tr>
@@ -121,7 +119,6 @@
             <div class="card p-4 mb-4 bg-white">
                 <h3 class="font-bold mb-4">Actions</h3>
                 
-                <!-- FITUR BARU: CRUD TOMBOL EDIT & DELETE (Aktif jika status belum PAID) -->
                 <% if(invoice.status !== 'PAID') { %>
                     <a href="/invoices/<%= invoice.id %>/edit" class="btn btn-outline w-full mb-2 block text-center" style="border-color: var(--warning); color: var(--warning);">Edit Invoice</a>
                     <form action="/invoices/<%= invoice.id %>/delete" method="POST" onsubmit="return confirm('Peringatan: Apakah Anda yakin ingin menghapus invoice ini secara permanen?');">
@@ -143,7 +140,12 @@
                         <a href="/invoices/<%= invoice.id %>/receipt" target="_blank" class="btn btn-primary w-full mb-3 block text-center" style="background: var(--success); border-color: var(--success);">Print Official Receipt</a>
                     <% } %>
 
-                    <button id="copyBtn" onclick="copyLink()" class="btn btn-outline w-full mb-2 bg-gray-50">Copy Public Link</button>
+                    <!-- FITUR TOMBOL COPY DIPERBARUI -->
+                    <button id="copyInvBtn" onclick="copyInvoiceLink()" class="btn btn-outline w-full mb-2 bg-gray-50 text-primary">Copy Public Invoice</button>
+                    
+                    <% if(invoice.status === 'PAID') { %>
+                        <button id="copyRecBtn" onclick="copyReceiptLink()" class="btn btn-outline w-full mb-2 bg-green-50" style="color: var(--success); border-color: var(--success);">Copy Public Receipt</button>
+                    <% } %>
                 <% } %>
             </div>
 
@@ -174,11 +176,27 @@
         </div>
     </div>
 
+    <!-- SCRIPT COPY LINK BERGANDA -->
     <script>
-        function copyLink() {
+        function copyInvoiceLink() {
             const url = window.location.origin + '/invoice/<%= invoice.publicId %>';
-            window.navigator.clipboard.writeText(url).then(() => {
-                const btn = document.getElementById('copyBtn');
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = document.getElementById('copyInvBtn');
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied!';
+                btn.classList.add('bg-green-100', 'text-green-800');
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove('bg-green-100', 'text-green-800');
+                }, 2000);
+            }).catch(err => { console.error('Copy failed', err); });
+        }
+
+        function copyReceiptLink() {
+            // Memanfaatkan URL rute baru yang Anda minta: /receipt/:publicId
+            const url = window.location.origin + '/receipt/<%= invoice.publicId %>';
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = document.getElementById('copyRecBtn');
                 const originalText = btn.innerText;
                 btn.innerText = 'Copied!';
                 btn.classList.add('bg-green-100', 'text-green-800');
