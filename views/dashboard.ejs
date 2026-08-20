@@ -8,26 +8,28 @@
     <link rel="icon" type="image/png" href="/img/axalogo.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="min-h-screen">
-    <nav class="navbar">
+<body class="min-h-screen bg-gray-50">
+    <nav class="navbar hide-print">
         <div class="container nav-content">
             <div class="brand"><%= settings.businessName || 'AXA XYZ' %></div>
             <div class="nav-links">
                 <a href="/dashboard">Dashboard</a>
                 <a href="/customers">Customers</a>
                 <a href="/invoices">Invoices</a>
+                <!-- MENU BARU: Akses langsung ke daftar kuitansi -->
+                <a href="/receipts">Receipts</a>
                 <a href="/settings">Settings</a>
                 <form action="/logout" method="POST" style="display:inline;">
-                    <button type="submit" class="btn btn-sm btn-outline">Logout</button>
+                    <button type="submit" class="btn btn-sm btn-outline" style="border-color: var(--danger); color: var(--danger);">Logout</button>
                 </form>
             </div>
         </div>
     </nav>
 
     <div class="container mt-8 mb-12">
-        <div class="flex justify-between items-center mb-6">
-            <h2>Dashboard</h2>
-            <a href="/invoices/new" class="btn btn-primary btn-sm">+ Buat Invoice</a>
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <h2>Dashboard Overview</h2>
+            <a href="/invoices/new" class="btn btn-primary">+ Buat Invoice</a>
         </div>
         
         <% if(typeof error !== 'undefined' && error) { %>
@@ -38,28 +40,28 @@
         <% } %>
 
         <div class="grid grid-cols-4 gap-6 mt-6">
-            <div class="card p-6">
+            <div class="card p-6 bg-white border-l-4" style="border-left-color: var(--primary);">
                 <div class="text-gray-500 text-sm font-bold mb-1">TOTAL INVOICE</div>
-                <div class="text-3xl font-bold"><%= stats.totalInvoices %></div>
+                <div class="text-3xl font-bold text-gray-800"><%= stats.totalInvoices %></div>
             </div>
-            <div class="card p-6">
+            <div class="card p-6 bg-white border-l-4" style="border-left-color: var(--success);">
                 <div class="text-gray-500 text-sm font-bold mb-1">TOTAL BILLED</div>
                 <div class="text-2xl font-bold text-primary"><%= formatRupiah(stats.totalBilled) %></div>
             </div>
-            <div class="card p-6">
+            <div class="card p-6 bg-white border-l-4" style="border-left-color: var(--warning);">
                 <div class="text-gray-500 text-sm font-bold mb-1">OUTSTANDING</div>
                 <div class="text-2xl font-bold text-orange-500"><%= formatRupiah(stats.outstanding) %></div>
             </div>
-            <div class="card p-6">
+            <div class="card p-6 bg-white border-l-4" style="border-left-color: var(--danger);">
                 <div class="text-gray-500 text-sm font-bold mb-1">OVERDUE</div>
                 <div class="text-2xl font-bold text-red-500"><%= formatRupiah(stats.overdue) %></div>
             </div>
         </div>
 
-        <h3 class="mt-8 mb-4">Recent Invoices</h3>
+        <h3 class="mt-10 mb-4 text-gray-700 border-b pb-2">Recent Invoices</h3>
         
-        <div class="card overflow-x-auto mb-8">
-            <table class="table">
+        <div class="card overflow-x-auto mb-8 bg-white">
+            <table class="table w-full">
                 <thead>
                     <tr>
                         <th>Number</th>
@@ -83,7 +85,8 @@
                                 <div class="flex justify-center gap-2">
                                     <a href="/invoices/<%= inv.id %>" class="btn btn-sm btn-outline">View</a>
                                     <% if(inv.status === 'PAID') { %>
-                                        <a href="/invoices/<%= inv.id %>/receipt" target="_blank" class="btn btn-sm btn-primary">Receipt</a>
+                                        <!-- Penyesuaian tombol receipt agar selaras dengan desain UI baru -->
+                                        <a href="/invoices/<%= inv.id %>/receipt" target="_blank" class="btn btn-sm" style="background: var(--success); color: white; border-color: var(--success);">Receipt</a>
                                     <% } %>
                                 </div>
                             </td>
@@ -91,8 +94,8 @@
                         <% }) %>
                     <% } else { %>
                         <tr>
-                            <td colspan="6" class="text-center text-gray-500 py-6">
-                                Belum ada data invoice. Silakan buat invoice baru.
+                            <td colspan="6" class="text-center text-gray-500 py-8">
+                                Belum ada data invoice saat ini. Silakan buat invoice baru untuk memulai.
                             </td>
                         </tr>
                     <% } %>
