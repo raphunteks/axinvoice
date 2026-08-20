@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipts - <%= settings.businessName || 'AXA XYZ' %></title>
+    <!-- Injeksi Favicon Global -->
+    <link rel="icon" type="image/png" href="/img/axalogo.png">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="min-h-screen">
+    <nav class="navbar">
+        <div class="container nav-content">
+            <div class="brand"><%= settings.businessName || 'AXA XYZ' %></div>
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/customers">Customers</a>
+                <a href="/invoices">Invoices</a>
+                <a href="/settings">Settings</a>
+                <form action="/logout" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-outline">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-8 mb-12">
+        <div class="flex justify-between items-center mb-6">
+            <h2>Official Receipts</h2>
+        </div>
+
+        <% if(typeof success !== 'undefined' && success) { %>
+            <div class="alert alert-success mb-4"><%= success %></div>
+        <% } %>
+
+        <div class="card overflow-x-auto mb-8 bg-white">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Number</th>
+                        <th>Customer</th>
+                        <th>Invoice Date</th>
+                        <th>Total Invoice</th>
+                        <th>Amount Paid</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% 
+                    // Fail-safe: Mendukung pelemparan data dengan nama variabel 'receipts' atau 'invoices' dari server.js
+                    const list = typeof receipts !== 'undefined' ? receipts : (typeof invoices !== 'undefined' ? invoices : []);
+                    
+                    // Filter: Hanya tampilkan data yang sudah memiliki riwayat pembayaran
+                    const paidList = list.filter(inv => inv.amountPaid > 0 || inv.status === 'PAID');
+                    %>
+                    
+                    <% paidList.forEach(inv => { %>
+                    <tr>
+                        <td class="font-medium"><%= inv.number %></td>
+                        <td><%= inv.customerName %></td>
+                        <td><%= formatDate(inv.invoiceDate) %></td>
+                        <td class="font-bold"><%= formatRupiah(inv.total) %></td>
+                        <td class="text-green-600 font-medium"><%= formatRupiah(inv.amountPaid) %></td>
+                        <td><span class="badge badge-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
+                        <td>
+                            <a href="/invoices/<%= inv.id %>/receipt" target="_blank" class="btn btn-sm" style="background: var(--success); color: white; border-color: var(--success);">View Receipt</a>
+                        </td>
+                    </tr>
+                    <% }) %>
+                    
+                    <% if(paidList.length === 0) { %>
+                        <tr><td colspan="7" class="text-center py-6 text-gray-500">Belum ada kuitansi pembayaran.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
