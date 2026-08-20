@@ -7,6 +7,7 @@
     <!-- Favicon Global Injection -->
     <link rel="icon" type="image/png" href="/img/axalogo.png">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/invoice.css">
 </head>
 <body class="min-h-screen bg-gray-50">
     <nav class="navbar hide-print">
@@ -19,19 +20,21 @@
         </div>
     </nav>
 
+    <!-- SUPER BIG UPGRADE: Responsive Flex-col untuk Layar Mobile -->
     <div class="container mt-8 mb-12 flex flex-col md:flex-row gap-6 hide-print">
-        <!-- Panel Kiri: Tampilan Invoice -->
+        
+        <!-- Panel Kiri: Konten Invoice -->
         <div class="w-full md:w-3/4">
             <% if(typeof success !== 'undefined' && success) { %><div class="alert alert-success mb-4"><%= success %></div><% } %>
             <% if(typeof error !== 'undefined' && error) { %><div class="alert alert-danger mb-4"><%= error %></div><% } %>
 
-            <div class="card p-8 bg-white">
-                <div class="flex justify-between items-start mb-8 border-b pb-6">
+            <div class="invoice-box card bg-white">
+                <div class="flex flex-col md:flex-row justify-between items-start mb-8 border-b pb-6 gap-4">
                     <div>
                         <h1 class="text-3xl font-bold text-primary mb-2">INVOICE</h1>
                         <p class="text-gray-500 font-medium">#<%= invoice.number %></p>
                     </div>
-                    <div class="text-right">
+                    <div class="text-left md:text-right">
                         <h2 class="font-bold text-xl"><%= settings.businessName || 'AXA XYZ' %></h2>
                         <p class="text-sm text-gray-500"><%= settings.businessAddress || '' %></p>
                         <p class="text-sm text-gray-500"><%= settings.businessEmail || '' %></p>
@@ -40,7 +43,7 @@
                     </div>
                 </div>
 
-                <div class="flex justify-between mb-8">
+                <div class="flex flex-col md:flex-row justify-between mb-8 gap-4">
                     <div>
                         <h3 class="font-bold text-gray-600 border-b mb-2 pb-1">BILL TO:</h3>
                         <p class="font-bold"><%= customer.companyName %></p>
@@ -48,8 +51,8 @@
                         <p class="text-sm text-gray-600"><%= customer.city || '' %> <%= customer.postalCode || '' %></p>
                         <p class="text-sm text-gray-600"><%= customer.email || '' %></p>
                     </div>
-                    <div class="text-right">
-                        <table class="text-sm ml-auto">
+                    <div class="text-left md:text-right">
+                        <table class="text-sm md:ml-auto">
                             <tr><td class="font-bold pr-4 py-1">Status:</td><td><span class="badge badge-<%= invoice.status.toLowerCase() %>"><%= invoice.status %></span></td></tr>
                             <tr><td class="font-bold pr-4 py-1">Invoice Date:</td><td class="text-gray-600"><%= formatDate(invoice.invoiceDate) %></td></tr>
                             <tr><td class="font-bold pr-4 py-1">Due Date:</td><td class="text-gray-600"><%= formatDate(invoice.dueDate) %></td></tr>
@@ -58,46 +61,52 @@
                 </div>
 
                 <div class="overflow-x-auto mb-8">
-                    <table class="table w-full">
+                    <table class="invoice-table w-full">
                         <thead>
                             <tr>
-                                <th class="text-left">DESCRIPTION</th>
-                                <th class="text-center">QTY</th>
-                                <th class="text-right">PRICE</th>
-                                <th class="text-right">TOTAL</th>
+                                <th class="text-left">Description</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-right">Price</th>
+                                <th class="text-right">Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             <% invoice.items.forEach(item => { %>
                             <tr>
                                 <td>
-                                    <b class="text-sm"><%= item.description %></b>
+                                    <b><%= item.description %></b>
                                     <% if(item.period) { %><div class="text-xs text-gray-500 mt-1"><%= item.period %></div><% } %>
                                 </td>
-                                <td class="text-center text-sm"><%= item.quantity %></td>
-                                <td class="text-right text-sm"><%= formatRupiah(item.price) %></td>
-                                <td class="text-right text-sm font-medium"><%= formatRupiah(item.total) %></td>
+                                <td class="text-center"><%= item.quantity %></td>
+                                <td class="text-right"><%= formatRupiah(item.price) %></td>
+                                <td class="text-right font-medium"><%= formatRupiah(item.total) %></td>
                             </tr>
                             <% }) %>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="flex flex-col md:flex-row justify-between mb-8 gap-8">
+                <div class="flex flex-col md:flex-row justify-end mb-8 gap-8">
                     <div class="w-full md:w-1/2">
                         <% if(invoice.notes) { %>
+                        <div class="mb-4 bg-gray-50 p-4 rounded border border-gray-100">
                             <h4 class="font-bold text-sm text-gray-600 mb-2">Notes:</h4>
                             <p class="text-sm whitespace-pre-wrap text-gray-700"><%= invoice.notes %></p>
+                        </div>
                         <% } %>
                     </div>
+                    
                     <div class="w-full md:w-1/2">
                         <table class="w-full text-right text-sm">
                             <tr><td class="py-1 text-gray-600">Subtotal</td><td class="py-1 font-medium"><%= formatRupiah(invoice.subtotal) %></td></tr>
-                            <% const discVal = invoice.discount || 0; %>
+                            
+                            <!-- MENAMPILKAN DISC & PPN DINAMIS SESUAI PERMINTAAN -->
+                            <% const discVal = invoice.discountAmount || invoice.discount || 0; %>
                             <% if(discVal > 0) { %>
-                                <tr><td class="py-1 text-gray-600">Discount <% if(invoice.discountRate) { %>(<%= invoice.discountRate %>%)<% } %></td><td class="py-1 text-red-500 font-medium">- <%= formatRupiah(discVal) %></td></tr>
+                                <tr><td class="py-1 text-gray-600">Discount (<%= invoice.discountRate || 0 %>%)</td><td class="py-1 font-medium text-red-500">- <%= formatRupiah(discVal) %></td></tr>
                             <% } %>
-                            <tr><td class="py-1 text-gray-600">PPN <% if(invoice.taxRate) { %>(<%= invoice.taxRate %>%)<% } %></td><td class="py-1 font-medium"><%= formatRupiah(invoice.tax) %></td></tr>
+                            <tr><td class="py-1 text-gray-600"><%= settings.defaultTaxName || 'PPN' %> (<%= invoice.taxRate || 0 %>%)</td><td class="py-1 font-medium"><%= formatRupiah(invoice.tax || 0) %></td></tr>
+                            
                             <tr class="text-lg font-bold border-t"><td class="py-3">Grand Total</td><td class="py-3 text-primary"><%= formatRupiah(invoice.total) %></td></tr>
                             <tr><td class="py-1 text-gray-600">Amount Paid</td><td class="py-1 text-green-600 font-medium"><%= formatRupiah(invoice.amountPaid) %></td></tr>
                             <tr class="font-bold text-xl"><td class="py-2">Balance Due</td><td class="py-2 text-red-600"><%= formatRupiah(invoice.balance) %></td></tr>
@@ -112,22 +121,26 @@
             <div class="card p-4 mb-4 bg-white">
                 <h3 class="font-bold mb-4">Actions</h3>
                 
+                <!-- FITUR BARU: CRUD TOMBOL EDIT & DELETE (Aktif jika status belum PAID) -->
+                <% if(invoice.status !== 'PAID') { %>
+                    <a href="/invoices/<%= invoice.id %>/edit" class="btn btn-outline w-full mb-2 block text-center" style="border-color: var(--warning); color: var(--warning);">Edit Invoice</a>
+                    <form action="/invoices/<%= invoice.id %>/delete" method="POST" onsubmit="return confirm('Peringatan: Apakah Anda yakin ingin menghapus invoice ini secara permanen?');">
+                        <button type="submit" class="btn btn-outline w-full mb-3 block text-center" style="border-color: var(--danger); color: var(--danger);">Delete Invoice</button>
+                    </form>
+                    <hr class="my-3 border-gray-200">
+                <% } %>
+
                 <% if(invoice.status === 'DRAFT') { %>
-                    <form action="/invoices/<%= invoice.id %>/issue" method="POST">
-                        <button type="submit" class="btn btn-primary w-full mb-2">Issue Invoice</button>
-                    </form>
-                    <!-- CRUD Edit & Delete Button -->
-                    <a href="/invoices/<%= invoice.id %>/edit" class="btn w-full mb-2 block text-center" style="background: var(--warning); color: white; border-color: var(--warning);">Edit Invoice</a>
-                    <form action="/invoices/<%= invoice.id %>/delete" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus invoice ini secara permanen?');">
-                        <button type="submit" class="btn w-full mb-2" style="background: var(--danger); color: white; border-color: var(--danger);">Delete Invoice</button>
-                    </form>
+                <form action="/invoices/<%= invoice.id %>/issue" method="POST">
+                    <button type="submit" class="btn btn-primary w-full mb-2">Issue Invoice</button>
+                </form>
                 <% } %>
 
                 <% if(invoice.status !== 'DRAFT') { %>
                     <a href="/invoices/<%= invoice.id %>/print" target="_blank" class="btn btn-outline w-full mb-3 block text-center">Print / PDF Invoice</a>
                     
                     <% if(invoice.status === 'PAID') { %>
-                        <a href="/invoices/<%= invoice.id %>/receipt" target="_blank" class="btn w-full mb-3 block text-center" style="background: var(--success); color: white; border-color: var(--success);">Print Official Receipt</a>
+                        <a href="/invoices/<%= invoice.id %>/receipt" target="_blank" class="btn btn-primary w-full mb-3 block text-center" style="background: var(--success); border-color: var(--success);">Print Official Receipt</a>
                     <% } %>
 
                     <button id="copyBtn" onclick="copyLink()" class="btn btn-outline w-full mb-2 bg-gray-50">Copy Public Link</button>
