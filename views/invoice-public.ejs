@@ -6,6 +6,7 @@
     <title>Invoice <%= invoice.number %> - <%= settings.businessName || 'AXA XYZ' %></title>
     <link rel="icon" type="image/png" href="/img/axalogo.png">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/invoice.css">
 </head>
 <body class="min-h-screen bg-gray-50">
     <!-- Navbar Minimalis untuk Publik -->
@@ -17,7 +18,8 @@
             <div class="flex gap-2">
                 <a href="/invoice/<%= invoice.publicId %>/print" target="_blank" class="btn btn-outline btn-sm">🖨️ Print / Save PDF</a>
                 <% if(invoice.status === 'PAID') { %>
-                    <a href="/invoice/<%= invoice.publicId %>/receipt" target="_blank" class="btn btn-sm" style="background: var(--success); color: white; border-color: var(--success);">Lihat Kuitansi</a>
+                    <!-- URL DIUBAH KE FORMAT BARU /receipt/:publicId -->
+                    <a href="/receipt/<%= invoice.publicId %>" target="_blank" class="btn btn-sm" style="background: var(--success); color: white; border-color: var(--success);">Lihat Kuitansi</a>
                 <% } %>
             </div>
         </div>
@@ -58,7 +60,7 @@
                 </div>
 
                 <div class="overflow-x-auto mb-8">
-                    <table class="table w-full">
+                    <table class="invoice-table w-full">
                         <thead>
                             <tr>
                                 <th class="text-left">DESCRIPTION</th>
@@ -100,7 +102,7 @@
                     <div class="w-full md:w-1/2">
                         <table class="w-full text-right text-sm">
                             <tr><td class="py-1 text-gray-600">Subtotal</td><td class="py-1 font-medium"><%= formatRupiah(invoice.subtotal) %></td></tr>
-                            <% const discValPub = invoice.discount || 0; %>
+                            <% const discValPub = invoice.discountAmount || invoice.discount || 0; %>
                             <% if(discValPub > 0) { %>
                                 <tr><td class="py-1 text-gray-600">Discount <% if(invoice.discountRate) { %>(<%= invoice.discountRate %>%)<% } %></td><td class="py-1 text-red-500 font-medium">- <%= formatRupiah(discValPub) %></td></tr>
                             <% } %>
