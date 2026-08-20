@@ -8,17 +8,18 @@
     <link rel="icon" type="image/png" href="/img/axalogo.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="min-h-screen">
-    <nav class="navbar">
+<body class="min-h-screen bg-gray-50">
+    <nav class="navbar hide-print">
         <div class="container nav-content">
             <div class="brand"><%= settings.businessName || 'AXA XYZ' %></div>
             <div class="nav-links">
                 <a href="/dashboard">Dashboard</a>
                 <a href="/customers">Customers</a>
                 <a href="/invoices">Invoices</a>
+                <a href="/receipts" class="font-bold text-primary">Receipts</a>
                 <a href="/settings">Settings</a>
                 <form action="/logout" method="POST" style="display:inline;">
-                    <button type="submit" class="btn btn-sm btn-outline">Logout</button>
+                    <button type="submit" class="btn btn-sm btn-outline" style="border-color: var(--danger); color: var(--danger);">Logout</button>
                 </form>
             </div>
         </div>
@@ -34,7 +35,7 @@
         <% } %>
 
         <div class="card overflow-x-auto mb-8 bg-white">
-            <table class="table">
+            <table class="table w-full">
                 <thead>
                     <tr>
                         <th>Number</th>
@@ -43,15 +44,12 @@
                         <th>Total Invoice</th>
                         <th>Amount Paid</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% 
-                    // Fail-safe: Mendukung pelemparan data dengan nama variabel 'receipts' atau 'invoices' dari server.js
                     const list = typeof receipts !== 'undefined' ? receipts : (typeof invoices !== 'undefined' ? invoices : []);
-                    
-                    // Filter: Hanya tampilkan data yang sudah memiliki riwayat pembayaran
                     const paidList = list.filter(inv => inv.amountPaid > 0 || inv.status === 'PAID');
                     %>
                     
@@ -63,14 +61,15 @@
                         <td class="font-bold"><%= formatRupiah(inv.total) %></td>
                         <td class="text-green-600 font-medium"><%= formatRupiah(inv.amountPaid) %></td>
                         <td><span class="badge badge-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
-                        <td>
-                            <a href="/invoices/<%= inv.id %>/receipt" target="_blank" class="btn btn-sm" style="background: var(--success); color: white; border-color: var(--success);">View Receipt</a>
+                        <td class="text-center">
+                            <!-- MENGARAH LANGSUNG KE URL PUBLIC RECEIPT /receipt/:publicId -->
+                            <a href="/receipt/<%= inv.publicId %>" target="_blank" class="btn btn-sm" style="background: var(--success); color: white; border-color: var(--success);">View Receipt</a>
                         </td>
                     </tr>
                     <% }) %>
                     
                     <% if(paidList.length === 0) { %>
-                        <tr><td colspan="7" class="text-center py-6 text-gray-500">Belum ada kuitansi pembayaran.</td></tr>
+                        <tr><td colspan="7" class="text-center py-8 text-gray-500">Belum ada kuitansi pembayaran yang diterbitkan.</td></tr>
                     <% } %>
                 </tbody>
             </table>
