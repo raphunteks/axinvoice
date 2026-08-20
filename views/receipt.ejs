@@ -33,6 +33,9 @@
         <% if(typeof success !== 'undefined' && success) { %>
             <div class="alert alert-success mb-4"><%= success %></div>
         <% } %>
+        <% if(typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger mb-4"><%= error %></div>
+        <% } %>
 
         <div class="card overflow-x-auto mb-8 bg-white">
             <table class="table w-full">
@@ -62,8 +65,15 @@
                         <td class="text-green-600 font-medium"><%= formatRupiah(inv.amountPaid) %></td>
                         <td><span class="badge badge-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
                         <td class="text-center">
-                            <!-- MENGARAH LANGSUNG KE URL PUBLIC RECEIPT /receipt/:publicId -->
-                            <a href="/receipt/<%= inv.publicId %>" target="_blank" class="btn btn-sm" style="background: var(--success); color: white; border-color: var(--success);">View Receipt</a>
+                            <div class="flex justify-center gap-2">
+                                <!-- MENGARAH LANGSUNG KE URL PUBLIC RECEIPT /receipt/:publicId -->
+                                <a href="/receipt/<%= inv.publicId %>" target="_blank" class="btn btn-sm btn-success">View Receipt</a>
+                                
+                                <!-- TOMBOL HAPUS DITAMBAHKAN DI SINI -->
+                                <form action="/invoices/<%= inv.id %>/delete" method="POST" onsubmit="return confirm('Peringatan: Apakah Anda yakin ingin menghapus kuitansi (serta invoice) ini secara permanen?');" style="margin: 0;">
+                                    <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     <% }) %>
