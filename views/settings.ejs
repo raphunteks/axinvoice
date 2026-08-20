@@ -8,17 +8,18 @@
     <link rel="icon" type="image/png" href="/img/axalogo.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="min-h-screen">
-    <nav class="navbar">
+<body class="min-h-screen bg-gray-50">
+    <nav class="navbar hide-print">
         <div class="container nav-content">
             <div class="brand"><%= settings.businessName || 'AXA XYZ' %></div>
             <div class="nav-links">
                 <a href="/dashboard">Dashboard</a>
                 <a href="/customers">Customers</a>
                 <a href="/invoices">Invoices</a>
-                <a href="/settings">Settings</a>
+                <a href="/receipts">Receipts</a>
+                <a href="/settings" class="font-bold text-primary">Settings</a>
                 <form action="/logout" method="POST" style="display:inline;">
-                    <button type="submit" class="btn btn-sm btn-outline">Logout</button>
+                    <button type="submit" class="btn btn-sm btn-outline" style="border-color: var(--danger); color: var(--danger);">Logout</button>
                 </form>
             </div>
         </div>
@@ -30,9 +31,12 @@
         <% if(typeof success !== 'undefined' && success) { %>
             <div class="alert alert-success mb-4 mt-4"><%= success %></div>
         <% } %>
+        <% if(typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger mb-4 mt-4"><%= error %></div>
+        <% } %>
 
         <form action="/settings" method="POST" class="mt-4 grid gap-6">
-            <div class="card p-6">
+            <div class="card p-6 bg-white">
                 <h3 class="mb-4 font-bold border-b pb-2 text-primary">Business Identity</h3>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="form-group"><label>Business Name</label><input type="text" name="businessName" class="form-control" placeholder="Contoh: AXA XYZ Corp" value="<%= settings.businessName || '' %>" required></div>
@@ -43,7 +47,7 @@
                 </div>
             </div>
 
-            <div class="card p-6">
+            <div class="card p-6 bg-white">
                 <h3 class="mb-4 font-bold border-b pb-2 text-primary">Payment Information</h3>
                 <div class="grid grid-cols-3 gap-4">
                     <div class="form-group"><label>Bank Name</label><input type="text" name="bankName" class="form-control" placeholder="Contoh: BCA / Mandiri" value="<%= settings.bankName || '' %>"></div>
@@ -52,7 +56,7 @@
                 </div>
             </div>
 
-            <div class="card p-6">
+            <div class="card p-6 bg-white">
                 <h3 class="mb-4 font-bold border-b pb-2 text-primary">Invoice Defaults</h3>
                 <div class="grid grid-cols-4 gap-4 mb-4">
                     <div class="form-group"><label>Invoice Prefix</label><input type="text" name="invoicePrefix" class="form-control" placeholder="Contoh: AXZ" value="<%= settings.invoicePrefix || 'AXZ' %>"></div>
