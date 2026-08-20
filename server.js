@@ -353,7 +353,7 @@ app.post('/invoices/:id/edit', requireAuth, async (req, res) => {
   } catch(error) { res.redirect(`/invoices/${req.params.id}`); }
 });
 
-// DELETE INVOICE
+// DELETE INVOICE (DENGAN SMART REDIRECT)
 app.post('/invoices/:id/delete', requireAuth, async (req, res) => {
   try {
     await redis.del(`axa:invoice:${req.params.id}`);
@@ -362,7 +362,14 @@ app.post('/invoices/:id/delete', requireAuth, async (req, res) => {
   } catch(err) {
     req.session.error = 'Gagal menghapus invoice.';
   }
-  res.redirect('/invoices');
+  
+  // Smart Redirect: Cek dari mana request delete ini berasal (Dashboard vs Halaman Lain)
+  const referer = req.get('Referrer');
+  if (referer && referer.includes('/dashboard')) {
+    res.redirect('/dashboard');
+  } else {
+    res.redirect('/invoices');
+  }
 });
 
 // GET DETAIL INVOICE
@@ -452,7 +459,6 @@ app.get('/invoice/:publicId/print', async (req, res) => {
   } catch (err) { res.status(500).send('Terjadi kesalahan muat public invoice print.'); }
 });
 
-// ROUTE DIPERBARUI: MENDUKUNG URL PENDEK /receipt/:publicId
 app.get('/receipt/:publicId', async (req, res) => {
   try {
     const ids = await redis.lrange('axa:invoices', 0, -1);
