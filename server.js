@@ -293,7 +293,7 @@ app.post('/invoices', requireAuth, async (req, res) => {
   } catch(error) { res.redirect('/invoices'); }
 });
 
-// FITUR BARU: GET EDIT INVOICE
+// GET EDIT INVOICE
 app.get('/invoices/:id/edit', requireAuth, async (req, res) => {
   try {
     const invoice = await redis.get(`axa:invoice:${req.params.id}`);
@@ -306,7 +306,7 @@ app.get('/invoices/:id/edit', requireAuth, async (req, res) => {
   } catch (error) { res.redirect('/invoices'); }
 });
 
-// FITUR BARU: POST EDIT INVOICE
+// POST EDIT INVOICE
 app.post('/invoices/:id/edit', requireAuth, async (req, res) => {
   try {
     const existingInvoice = await redis.get(`axa:invoice:${req.params.id}`);
@@ -353,7 +353,7 @@ app.post('/invoices/:id/edit', requireAuth, async (req, res) => {
   } catch(error) { res.redirect(`/invoices/${req.params.id}`); }
 });
 
-// FITUR BARU: DELETE INVOICE
+// DELETE INVOICE
 app.post('/invoices/:id/delete', requireAuth, async (req, res) => {
   try {
     await redis.del(`axa:invoice:${req.params.id}`);
@@ -440,6 +440,20 @@ app.get('/invoice/:publicId', async (req, res) => {
   } catch (err) { res.status(500).send('Terjadi kesalahan muat public invoice.'); }
 });
 
+// FITUR BARU: ROUTE PRINT PUBLIC INVOICE
+app.get('/invoice/:publicId/print', async (req, res) => {
+  try {
+    const ids = await redis.lrange('axa:invoices', 0, -1);
+    let invoices = ids.length ? await Promise.all(ids.map(id => redis.get(`axa:invoice:${id}`))) : [];
+    let invoice = invoices.find(i => i && i.publicId === req.params.publicId);
+    if (!invoice) return res.status(404).send('Invoice Not Found');
+    
+    const customer = await redis.get(`axa:customer:${invoice.customerId}`);
+    res.render('invoice-print', { invoice, customer });
+  } catch (err) { res.status(500).send('Terjadi kesalahan muat public invoice print.'); }
+});
+
+// FITUR DIPERBARUI: MERENDER RECEIPT-PUBLIC BUKAN RECEIPT-PRINT
 app.get('/invoice/:publicId/receipt', async (req, res) => {
   try {
     const ids = await redis.lrange('axa:invoices', 0, -1);
@@ -448,7 +462,7 @@ app.get('/invoice/:publicId/receipt', async (req, res) => {
     if (!invoice || invoice.status !== 'PAID') return res.status(404).send('Kuitansi belum tersedia.');
     
     const customer = await redis.get(`axa:customer:${invoice.customerId}`);
-    res.render('receipt-print', { invoice, customer });
+    res.render('receipt-public', { invoice, customer });
   } catch (err) { res.status(500).send('Terjadi kesalahan muat kuitansi public.'); }
 });
 
