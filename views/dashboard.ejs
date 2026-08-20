@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - <%= settings.businessName || 'AXA XYZ' %></title>
-    <!-- Injeksi Favicon Global -->
     <link rel="icon" type="image/png" href="/img/axalogo.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -13,10 +12,9 @@
         <div class="container nav-content">
             <div class="brand"><%= settings.businessName || 'AXA XYZ' %></div>
             <div class="nav-links">
-                <a href="/dashboard">Dashboard</a>
+                <a href="/dashboard" class="font-bold text-primary">Dashboard</a>
                 <a href="/customers">Customers</a>
                 <a href="/invoices">Invoices</a>
-                <!-- MENU BARU: Akses langsung ke daftar kuitansi -->
                 <a href="/receipts">Receipts</a>
                 <a href="/settings">Settings</a>
                 <form action="/logout" method="POST" style="display:inline;">
@@ -85,9 +83,12 @@
                                 <div class="flex justify-center gap-2">
                                     <a href="/invoices/<%= inv.id %>" class="btn btn-sm btn-outline">View</a>
                                     <% if(inv.status === 'PAID') { %>
-                                        <!-- Penyesuaian tombol receipt agar selaras dengan desain UI baru -->
-                                        <a href="/invoices/<%= inv.id %>/receipt" target="_blank" class="btn btn-sm" style="background: var(--success); color: white; border-color: var(--success);">Receipt</a>
+                                        <a href="/invoices/<%= inv.id %>/receipt" target="_blank" class="btn btn-sm btn-success">Receipt</a>
                                     <% } %>
+                                    <!-- TOMBOL HAPUS DITAMBAHKAN DI SINI -->
+                                    <form action="/invoices/<%= inv.id %>/delete" method="POST" onsubmit="return confirm('Peringatan: Apakah Anda yakin ingin menghapus invoice ini secara permanen?');" style="margin: 0;">
+                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
