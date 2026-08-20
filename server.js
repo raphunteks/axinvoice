@@ -425,7 +425,7 @@ app.get('/invoices/:id/receipt', requireAuth, async (req, res) => {
 });
 
 // ==========================================
-// 8. PUBLIC INVOICE
+// 8. PUBLIC INVOICE & RECEIPT LINKS
 // ==========================================
 app.get('/invoice/:publicId', async (req, res) => {
   try {
@@ -452,12 +452,13 @@ app.get('/invoice/:publicId/print', async (req, res) => {
   } catch (err) { res.status(500).send('Terjadi kesalahan muat public invoice print.'); }
 });
 
-app.get('/invoice/:publicId/receipt', async (req, res) => {
+// ROUTE DIPERBARUI: MENDUKUNG URL PENDEK /receipt/:publicId
+app.get('/receipt/:publicId', async (req, res) => {
   try {
     const ids = await redis.lrange('axa:invoices', 0, -1);
     let invoices = ids.length ? await Promise.all(ids.map(id => redis.get(`axa:invoice:${id}`))) : [];
     let invoice = invoices.find(i => i && i.publicId === req.params.publicId);
-    if (!invoice || invoice.status !== 'PAID') return res.status(404).send('Kuitansi belum tersedia.');
+    if (!invoice || invoice.status !== 'PAID') return res.status(404).send('Kuitansi belum tersedia atau belum lunas.');
     
     const customer = await redis.get(`axa:customer:${invoice.customerId}`);
     res.render('receipt-public', { invoice, customer });
