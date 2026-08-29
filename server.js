@@ -522,7 +522,7 @@ app.post('/settings', requireAuth, async (req, res) => {
 
 app.use((err, req, res, next) => {
   console.error('🔥 FATAL SERVER ERROR:', err.stack);
-  res.status(500).send('Terjadi kesalahan pada server. Silakan cek Application Logs di Vercel.');
+  res.status(500).send('Terjadi kesalahan pada server. Silakan cek Application Logs di Vercel (COBA CEK ENV MASUKKAN ADMIN_USER, ADMIN_PASS & UPTASH REDIS KV.');
 });
 
 module.exports = app;
